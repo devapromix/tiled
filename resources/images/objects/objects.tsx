@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<tileset name="objects" tilewidth="32" tileheight="32" tilecount="8" columns="0">
+<tileset name="objects" tilewidth="32" tileheight="32" tilecount="11" columns="0">
  <grid orientation="orthogonal" width="1" height="1"/>
  <tile id="0" type="player_start">
   <image width="32" height="32" source="player_start.png"/>
@@ -24,5 +24,14 @@
  </tile>
  <tile id="7" type="opened_door">
   <image width="32" height="32" source="opened_door.png"/>
+ </tile>
+ <tile id="8" type="trapped_chest">
+  <image width="32" height="32" source="closed_chest.png"/>
+ </tile>
+ <tile id="9" type="closed_chest">
+  <image width="32" height="32" source="closed_chest.png"/>
+ </tile>
+ <tile id="10" type="opened_chest">
+  <image width="32" height="32" source="opened_chest.png"/>
  </tile>
 </tileset>
