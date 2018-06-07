@@ -97,7 +97,6 @@ var
     Node := XMLDoc.DocumentElement.ChildNodes[I].ChildNodes['data'];
     SL := TStringList.Create;
     SL.Text := Trim(Node.Text);
-//    ShowMessage(SL.Text);
     for Y := 0 to FHeight - 1 do
     begin
       V := SL[Y].Split([',']);
@@ -146,7 +145,6 @@ var
                 TiledObject[ID].Passable := StrToBool(Value);
               if (Name = 'transparent') then
                 TiledObject[ID].Transparent := StrToBool(Value);
-              // ShowMessage();
             end;
           end;
           Inc(ID);
@@ -185,7 +183,7 @@ begin
           Firstgid[lrMonsters] := StrToInt(Trim(Node.Attributes['firstgid']));
         LoadTileset(S);
       end;
-      {if Node.NodeName = 'layer' then
+      if Node.NodeName = 'layer' then
       begin
         LayerName := Node.Attributes['name'];
         if (LayerName = 'tiles') then
@@ -196,12 +194,11 @@ begin
           LoadLayer(lrItems);
         if (LayerName = 'monsters') then
           LoadLayer(lrMonsters);
-      end;}
+      end;
     end;
   finally
     XMLDoc.Free;
   end;
-  // Halt;
 end;
 
 { TTiledObject }

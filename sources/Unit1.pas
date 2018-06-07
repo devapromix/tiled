@@ -49,7 +49,6 @@ var
 begin
   Map := TTiledMap.Create(Form1);
   Map.LoadFromFile('dungeon.tmx');
-  ShowMessage(IntToStr(Map.FMap[lrTiles][0][0]));
   //
   ClientWidth := Map.TileSize * Map.Width;
   ClientHeight := Map.TileSize * Map.Height;
@@ -60,14 +59,14 @@ begin
   PNGPlayer := TPNGImage.Create;
   PNGPlayer.LoadFromFile(GetPath('resources\images\races') + 'human.png');
   //
-  {for Y := 0 to Map.Height - 1 do
+  for Y := 0 to Map.Height - 1 do
     for X := 0 to Map.Width - 1 do
       if Map.GetTileType(lrObjects, X, Y) = 'up_stairs' then
       begin
         PX := X;
         PY := Y;
         Break;
-      end; }
+      end;
   Exit;
 end;
 
@@ -142,7 +141,6 @@ var
   X, Y: Integer;
   L: TLayerEnum;
 begin
-  Exit;
   for Y := 0 to Map.Height - 1 do
     for X := 0 to Map.Width - 1 do
     begin
