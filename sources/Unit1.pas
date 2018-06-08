@@ -5,7 +5,7 @@ interface
 uses
   Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants,
   System.Classes, Vcl.Graphics, Vcl.Controls, Vcl.Forms, Vcl.Dialogs,
-  Vcl.Imaging.PNGImage, TiledMap;
+  Vcl.Imaging.PNGImage, TiledMap, Vcl.ExtCtrls;
 
 type
   TForm1 = class(TForm)
@@ -29,13 +29,17 @@ uses Math;
 
 {$R *.dfm}
 
-var
-  PNGPlayer: TPNGImage;
-  PX: Integer;
-  PY: Integer;
+type
+  TPlayer = record
+    Image: TPNGImage;
+    X: Integer;
+    Y: Integer;
+    procedure SetLocation(AX, AY: Integer);
+  end;
 
 var
   Map: TTiledMap;
+  Player: TPlayer;
 
 function GetPath(SubDir: string): string;
 begin
@@ -56,15 +60,14 @@ begin
   Surface.Width := ClientWidth;
   Surface.Height := ClientHeight;
   //
-  PNGPlayer := TPNGImage.Create;
-  PNGPlayer.LoadFromFile(GetPath('resources\images\races') + 'human.png');
+  Player.Image := TPNGImage.Create;
+  Player.Image.LoadFromFile(GetPath('resources\images\races') + 'human.png');
   //
   for Y := 0 to Map.Height - 1 do
     for X := 0 to Map.Width - 1 do
       if Map.GetTileType(lrObjects, X, Y) = 'up_stairs' then
       begin
-        PX := X;
-        PY := Y;
+        Player.SetLocation(X, Y);
         Break;
       end;
   Exit;
@@ -73,7 +76,7 @@ end;
 procedure TForm1.FormDestroy(Sender: TObject);
 begin
   Map.Free;
-  PNGPlayer.Free;
+  Player.Image.Free;
   Surface.Free;
 end;
 
@@ -82,8 +85,8 @@ var
   TX, TY: Integer;
   TileType, ObjType, ItemType, MonType: string;
 begin
-  TX := PX + X;
-  TY := PY + Y;
+  TX := Player.X + X;
+  TY := Player.Y + Y;
   if (TX < 0) or (TX > Map.Width - 1) then
     Exit;
   if (TY < 0) or (TY > Map.Height - 1) then
@@ -117,8 +120,7 @@ begin
   begin
     Map.FMap[lrMonsters][TX][TY] := -1;
   end;
-  PX := TX;
-  PY := TY;
+  Player.SetLocation(TX, TY);
 end;
 
 procedure TForm1.FormKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
@@ -149,8 +151,16 @@ begin
           Surface.Canvas.Draw(X * Map.TileSize, Y * Map.TileSize,
             Map.TiledObject[Map.FMap[L][X][Y]].Image);
     end;
-  Surface.Canvas.Draw(PX * Map.TileSize, PY * Map.TileSize, PNGPlayer);
+  Surface.Canvas.Draw(Player.X * Map.TileSize, Player.Y * Map.TileSize, Player.Image);
   Canvas.Draw(0, 0, Surface);
+end;
+
+{ TPlayer }
+
+procedure TPlayer.SetLocation(AX, AY: Integer);
+begin
+  Self.X := AX;
+  Self.Y := AY;
 end;
 
 end.

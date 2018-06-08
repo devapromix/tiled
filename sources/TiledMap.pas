@@ -113,7 +113,7 @@ var
     I, J, Count, PropCount, Index: Integer;
     S, Name, Value, TileType: string;
   begin
-    XMLDoc := TXMLDocument.Create(Form1);
+    XMLDoc := TXMLDocument.Create(FOwner);
     XMLDoc.LoadFromFile(FileName);
     try
       Count := XMLDoc.DocumentElement.ChildNodes.Count;
@@ -157,7 +157,7 @@ var
 
 begin
   ID := 0;
-  XMLDoc := TXMLDocument.Create(Form1);
+  XMLDoc := TXMLDocument.Create(FOwner);
   F := GetPath('resources\maps');
   XMLDoc.LoadFromFile(F + FileName);
   try
