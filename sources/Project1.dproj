@@ -108,6 +108,7 @@
             <FormType>dfm</FormType>
         </DCCReference>
         <DCCReference Include="TiledMap.pas"/>
+        <DCCReference Include="WorldMap.pas"/>
         <BuildConfiguration Include="Release">
             <Key>Cfg_2</Key>
             <CfgParent>Base</CfgParent>

@@ -5,30 +5,29 @@ interface
 uses System.Classes, Vcl.Imaging.PNGImage;
 
 type
-  TLayer = array of array of Integer;
-
-type
-  TLayerEnum = (lrTiles, lrObjects, lrItems, lrMonsters);
-
-type
-  TTiledObject = class(TObject)
-  private
-  public
-    Image: TPNGImage;
-    TileType: string;
-    Passable: Boolean;
-    Transparent: Boolean;
-    constructor Create;
-    destructor Destroy; override;
-  end;
-
-type
   TTiledMap = class(TObject)
+  private type
+    TLayer = array of array of Integer;
   private
     FWidth: Integer;
     FHeight: Integer;
     FTileSize: Integer;
     FOwner: TComponent;
+    FName: string;
+    FLevel: Integer;
+  public type
+    TLayerEnum = (lrTiles, lrObjects, lrItems, lrMonsters);
+  public type
+    TTiledObject = class(TObject)
+    private
+    public
+      Image: TPNGImage;
+      TileType: string;
+      Passable: Boolean;
+      Transparent: Boolean;
+      constructor Create;
+      destructor Destroy; override;
+    end;
   public
     FMap: array [TLayerEnum] of TLayer;
     Firstgid: array [TLayerEnum] of Integer;
@@ -39,12 +38,14 @@ type
     property Width: Integer read FWidth;
     property Height: Integer read FHeight;
     property TileSize: Integer read FTileSize;
+    property Name: string read FName;
+    property Level: Integer read FLevel;
     function GetTileType(const L: TLayerEnum; const X, Y: Integer): string;
   end;
 
 implementation
 
-uses SysUtils, Math, Dialogs, Xml.XMLDoc, Xml.XMLIntf, System.IOUtils, Unit1;
+uses System.SysUtils, Xml.XMLDoc, Xml.XMLIntf, System.IOUtils;
 
 { TTiledMap }
 
@@ -60,6 +61,8 @@ begin
   FWidth := 100;
   FHeight := 100;
   FTileSize := 32;
+  FLevel := 0;
+  FName := '';
 end;
 
 destructor TTiledMap.Destroy;
@@ -67,7 +70,7 @@ var
   I: Integer;
 begin
   for I := 0 to High(TiledObject) do
-    TiledObject[I].Free;
+    FreeAndNil(TiledObject[I]);
   inherited;
 end;
 
@@ -103,15 +106,15 @@ var
       for X := 0 to FWidth - 1 do
         FMap[L][X][Y] := StrToIntDef(V[X], 0) - 1;
     end;
-    SL.Free;
+    FreeAndNil(SL);
   end;
 
   procedure LoadTileset(const FileName: string);
   var
     XMLDoc: TXMLDocument;
     Node, NodeProps, NodeProp: IXMLNode;
-    I, J, Count, PropCount, Index: Integer;
-    S, Name, Value, TileType: string;
+    I, J, Count, PropCount: Integer;
+    Name, Value, TileType: string;
   begin
     XMLDoc := TXMLDocument.Create(FOwner);
     XMLDoc.LoadFromFile(FileName);
@@ -124,7 +127,6 @@ var
         if Node.NodeName = 'tile' then
         begin
           TileType := Trim(Node.Attributes['type']);
-          // Index := StrToIntDef(Trim(Node.Attributes['id']), 0);
           NodeProps := Node.ChildNodes['properties'];
           PropCount := NodeProps.ChildNodes.Count;
           Node := Node.ChildNodes['image'];
@@ -151,7 +153,25 @@ var
         end;
       end;
     finally
-      XMLDoc.Free;
+      FreeAndNil(XMLDoc);
+    end;
+  end;
+
+  procedure LoadProperties(Node: IXMLNode);
+  var
+    N: IXMLNode;
+    I: Integer;
+    Name, Value: string;
+  begin
+    for I := 0 to Node.ChildNodes.Count - 1 do
+    begin
+      N := Node.ChildNodes[I];
+      Name := Trim(N.Attributes['name']);
+      Value := Trim(N.Attributes['value']);
+      if Name = 'Name' then
+        FName := Value;
+      if Name = 'Level' then
+        FLevel := StrToIntDef(Value, 0);
     end;
   end;
 
@@ -169,6 +189,11 @@ begin
     for I := 0 to Count - 1 do
     begin
       Node := XMLDoc.DocumentElement.ChildNodes[I];
+      if Node.NodeName = 'properties' then
+      begin
+        LoadProperties(Node);
+        Continue;
+      end;
       if Node.NodeName = 'tileset' then
       begin
         S := F + Trim(Node.Attributes['source']);
@@ -182,10 +207,11 @@ begin
         if Section = 'monsters' then
           Firstgid[lrMonsters] := StrToInt(Trim(Node.Attributes['firstgid']));
         LoadTileset(S);
+        Continue;
       end;
       if Node.NodeName = 'layer' then
       begin
-        LayerName := Node.Attributes['name'];
+        LayerName := Trim(Node.Attributes['name']);
         if (LayerName = 'tiles') then
           LoadLayer(lrTiles);
         if (LayerName = 'objects') then
@@ -197,20 +223,20 @@ begin
       end;
     end;
   finally
-    XMLDoc.Free;
+    FreeAndNil(XMLDoc);
   end;
 end;
 
-{ TTiledObject }
+{ TTiledMap.TTiledObject }
 
-constructor TTiledObject.Create;
+constructor TTiledMap.TTiledObject.Create;
 begin
   Image := TPNGImage.Create;
 end;
 
-destructor TTiledObject.Destroy;
+destructor TTiledMap.TTiledObject.Destroy;
 begin
-  Image.Free;
+  FreeAndNil(Image);
   inherited;
 end;
 

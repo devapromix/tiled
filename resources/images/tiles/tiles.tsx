@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<tileset name="tiles" tilewidth="32" tileheight="32" tilecount="4" columns="0">
+<tileset name="tiles" tilewidth="32" tileheight="32" tilecount="5" columns="0">
  <grid orientation="orthogonal" width="1" height="1"/>
  <tile id="0" type="floor">
   <properties>
@@ -28,5 +28,12 @@
    <property name="transparent" type="bool" value="true"/>
   </properties>
   <image width="32" height="32" source="lava.png"/>
+ </tile>
+ <tile id="4" type="floor">
+  <properties>
+   <property name="passable" type="bool" value="true"/>
+   <property name="transparent" type="bool" value="true"/>
+  </properties>
+  <image width="32" height="32" source="water.png"/>
  </tile>
 </tileset>

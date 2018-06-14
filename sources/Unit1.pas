@@ -15,9 +15,9 @@ type
     procedure FormKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
   private
     { Private declarations }
+    Surface: TBitmap;
   public
     { Public declarations }
-    Surface: TBitmap;
   end;
 
 var
@@ -25,7 +25,7 @@ var
 
 implementation
 
-uses Math;
+uses Math, WorldMap;
 
 {$R *.dfm}
 
@@ -38,7 +38,7 @@ type
   end;
 
 var
-  Map: TTiledMap;
+  Map: TWorldMap;
   Player: TPlayer;
 
 function GetPath(SubDir: string): string;
@@ -47,37 +47,38 @@ begin
   Result := IncludeTrailingPathDelimiter(Result + SubDir);
 end;
 
-procedure TForm1.FormCreate(Sender: TObject);
-var
-  X, Y: Integer;
+procedure RefreshMap;
 begin
-  Map := TTiledMap.Create(Form1);
-  Map.LoadFromFile('dungeon.tmx');
-  //
-  ClientWidth := Map.TileSize * Map.Width;
-  ClientHeight := Map.TileSize * Map.Height;
+  with Form1 do
+  begin
+    Caption := Format('%s (%d)', [Map.GetCurrentMap.Name,
+      Map.GetCurrentMap.Level]);
+    ClientWidth := Map.GetCurrentMap.TileSize * Map.GetCurrentMap.Width;
+    ClientHeight := Map.GetCurrentMap.TileSize * Map.GetCurrentMap.Height;
+    Surface.Width := ClientWidth;
+    Surface.Height := ClientHeight;
+  end;
+end;
+
+procedure TForm1.FormCreate(Sender: TObject);
+begin
+  Map := TWorldMap.Create(Self);
+  Map.LoadFromFile('forest_of_bears.ini');
+
   Surface := TBitmap.Create;
-  Surface.Width := ClientWidth;
-  Surface.Height := ClientHeight;
-  //
+
   Player.Image := TPNGImage.Create;
   Player.Image.LoadFromFile(GetPath('resources\images\races') + 'human.png');
-  //
-  for Y := 0 to Map.Height - 1 do
-    for X := 0 to Map.Width - 1 do
-      if Map.GetTileType(lrObjects, X, Y) = 'up_stairs' then
-      begin
-        Player.SetLocation(X, Y);
-        Break;
-      end;
-  Exit;
+  Player.SetLocation(1, 1);
+
+  RefreshMap;
 end;
 
 procedure TForm1.FormDestroy(Sender: TObject);
 begin
-  Map.Free;
-  Player.Image.Free;
-  Surface.Free;
+  FreeAndNil(Player.Image);
+  FreeAndNil(Surface);
+  FreeAndNil(Map);
 end;
 
 procedure Move(X, Y: Integer);
@@ -87,40 +88,73 @@ var
 begin
   TX := Player.X + X;
   TY := Player.Y + Y;
-  if (TX < 0) or (TX > Map.Width - 1) then
+  //
+  if (TX < 0) and Map.Go(drMapLeft) then
+  begin
+    RefreshMap;
+    Player.SetLocation(Map.GetCurrentMap.Width - 1, Player.Y);
+  end;
+  if (TX > Map.GetCurrentMap.Width - 1) and Map.Go(drMapRight) then
+  begin
+    RefreshMap;
+    Player.SetLocation(0, Player.Y);
+  end;
+  if (TY < 0) and Map.Go(drMapUp) then
+  begin
+    RefreshMap;
+    Player.SetLocation(Player.X, Map.GetCurrentMap.Height - 1);
+  end;
+  if (TY > Map.GetCurrentMap.Height - 1) and Map.Go(drMapDown) then
+  begin
+    RefreshMap;
+    Player.SetLocation(Player.X, 0);
+  end;
+  //
+  if (TX < 0) or (TX > Map.GetCurrentMap.Width - 1) then
     Exit;
-  if (TY < 0) or (TY > Map.Height - 1) then
+  if (TY < 0) or (TY > Map.GetCurrentMap.Height - 1) then
     Exit;
 
-  TileType := Map.GetTileType(lrTiles, TX, TY);
-  ObjType := Map.GetTileType(lrObjects, TX, TY);
-  ItemType := Map.GetTileType(lrItems, TX, TY);
-  MonType := Map.GetTileType(lrMonsters, TX, TY);
+  TileType := Map.GetCurrentMap.GetTileType(lrTiles, TX, TY);
+  ObjType := Map.GetCurrentMap.GetTileType(lrObjects, TX, TY);
+  ItemType := Map.GetCurrentMap.GetTileType(lrItems, TX, TY);
+  MonType := Map.GetCurrentMap.GetTileType(lrMonsters, TX, TY);
 
-  if not Map.TiledObject[Map.FMap[lrTiles][TX][TY]].Passable then
+  if not Map.GetCurrentMap.TiledObject[Map.GetCurrentMap.FMap[lrTiles][TX][TY]].Passable
+  then
     Exit;
 
   if (ObjType = 'closed_door') or (ObjType = 'hidden_door') or
     (ObjType = 'closed_chest') or (ObjType = 'trapped_chest') then
   begin
-    Inc(Map.FMap[lrObjects][TX][TY]);
+    Inc(Map.GetCurrentMap.FMap[lrObjects][TX][TY]);
     if (ObjType = 'closed_chest') then
-      Map.FMap[lrItems][TX][TY] := RandomRange(Map.Firstgid[lrItems],
-        Map.Firstgid[lrMonsters]) - 1;
+      Map.GetCurrentMap.FMap[lrItems][TX][TY] :=
+        RandomRange(Map.GetCurrentMap.Firstgid[lrItems],
+        Map.GetCurrentMap.Firstgid[lrMonsters]) - 1;
     Exit;
   end;
 
-  if (ObjType = 'up_stairs') or (ObjType = 'down_stairs') then
-    Halt;
   if (ItemType <> '') then
   begin
-    Map.FMap[lrItems][TX][TY] := -1;
+    Map.GetCurrentMap.FMap[lrItems][TX][TY] := -1;
   end;
   if (MonType <> '') then
   begin
-    Map.FMap[lrMonsters][TX][TY] := -1;
+    Map.GetCurrentMap.FMap[lrMonsters][TX][TY] := -1;
   end;
   Player.SetLocation(TX, TY);
+end;
+
+procedure Use;
+var
+  ObjType: string;
+begin
+  ObjType := Map.GetCurrentMap.GetTileType(lrObjects, Player.X, Player.Y);
+  if (ObjType = 'up_stairs') and Map.Go(drMapTop) then
+    RefreshMap;;
+  if (ObjType = 'down_stairs') and Map.Go(drMapBottom) then
+    RefreshMap;;
 end;
 
 procedure TForm1.FormKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
@@ -134,6 +168,8 @@ begin
       Move(0, -1);
     40:
       Move(0, 1);
+    13, 32:
+      Use;
   end;
   FormPaint(Sender);
 end;
@@ -141,17 +177,19 @@ end;
 procedure TForm1.FormPaint(Sender: TObject);
 var
   X, Y: Integer;
-  L: TLayerEnum;
+  L: TTiledMap.TLayerEnum;
 begin
-  for Y := 0 to Map.Height - 1 do
-    for X := 0 to Map.Width - 1 do
+  for Y := 0 to Map.GetCurrentMap.Height - 1 do
+    for X := 0 to Map.GetCurrentMap.Width - 1 do
     begin
-      for L := Low(TLayerEnum) to High(TLayerEnum) do
-        if (Map.FMap[L][X][Y] >= 0) then
-          Surface.Canvas.Draw(X * Map.TileSize, Y * Map.TileSize,
-            Map.TiledObject[Map.FMap[L][X][Y]].Image);
+      for L := Low(TTiledMap.TLayerEnum) to High(TTiledMap.TLayerEnum) do
+        if (Map.GetCurrentMap.FMap[L][X][Y] >= 0) then
+          Surface.Canvas.Draw(X * Map.GetCurrentMap.TileSize,
+            Y * Map.GetCurrentMap.TileSize, Map.GetCurrentMap.TiledObject
+            [Map.GetCurrentMap.FMap[L][X][Y]].Image);
     end;
-  Surface.Canvas.Draw(Player.X * Map.TileSize, Player.Y * Map.TileSize, Player.Image);
+  Surface.Canvas.Draw(Player.X * Map.GetCurrentMap.TileSize,
+    Player.Y * Map.GetCurrentMap.TileSize, Player.Image);
   Canvas.Draw(0, 0, Surface);
 end;
 
