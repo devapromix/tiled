@@ -13,9 +13,16 @@ type
     procedure FormDestroy(Sender: TObject);
     procedure FormPaint(Sender: TObject);
     procedure FormKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
+    procedure FormResize(Sender: TObject);
   private
     { Private declarations }
     Surface: TBitmap;
+    // Player
+    procedure OnLevel;
+    procedure OnAddExp(Value: Integer);
+    procedure OnModHP(Value: Integer);
+    procedure OnDead;
+    procedure AddToLog(const M: string);
   public
     { Public declarations }
   end;
@@ -25,21 +32,12 @@ var
 
 implementation
 
-uses Math, WorldMap;
+uses Math, WorldMap, Unit2, Test.Player, Unit3;
 
 {$R *.dfm}
 
-type
-  TPlayer = record
-    Image: TPNGImage;
-    X: Integer;
-    Y: Integer;
-    procedure SetLocation(AX, AY: Integer);
-  end;
-
 var
   Map: TWorldMap;
-  Player: TPlayer;
 
 function GetPath(SubDir: string): string;
 begin
@@ -57,26 +55,35 @@ begin
     ClientHeight := Map.GetCurrentMap.TileSize * Map.GetCurrentMap.Height;
     Surface.Width := ClientWidth;
     Surface.Height := ClientHeight;
+    Constraints.MinWidth := Width;
+    Constraints.MinHeight := Height;
   end;
+end;
+
+procedure TForm1.AddToLog(const M: string);
+begin
+  Msg := Trim(Msg + ' ' + M);
 end;
 
 procedure TForm1.FormCreate(Sender: TObject);
 begin
   Map := TWorldMap.Create(Self);
   Map.LoadFromFile('forest_of_bears.ini');
-
+  //
   Surface := TBitmap.Create;
-
-  Player.Image := TPNGImage.Create;
-  Player.Image.LoadFromFile(GetPath('resources\images\races') + 'human.png');
-  Player.SetLocation(1, 1);
-
+  // Player
+  Player.OnLevel := OnLevel;
+  Player.OnModHP := OnModHP;
+  Player.OnBeforeAddExp := OnAddExp;
+  Player.OnMinHP := OnDead;
+  OnLevel;
+  Player.SetLocation(2, 3);
+  //
   RefreshMap;
 end;
 
 procedure TForm1.FormDestroy(Sender: TObject);
 begin
-  FreeAndNil(Player.Image);
   FreeAndNil(Surface);
   FreeAndNil(Map);
 end;
@@ -91,21 +98,25 @@ begin
   //
   if (TX < 0) and Map.Go(drMapLeft) then
   begin
+    Form3.MsgLog.Clear;
     RefreshMap;
     Player.SetLocation(Map.GetCurrentMap.Width - 1, Player.Y);
   end;
   if (TX > Map.GetCurrentMap.Width - 1) and Map.Go(drMapRight) then
   begin
+    Form3.MsgLog.Clear;
     RefreshMap;
     Player.SetLocation(0, Player.Y);
   end;
   if (TY < 0) and Map.Go(drMapUp) then
   begin
+    Form3.MsgLog.Clear;
     RefreshMap;
     Player.SetLocation(Player.X, Map.GetCurrentMap.Height - 1);
   end;
   if (TY > Map.GetCurrentMap.Height - 1) and Map.Go(drMapDown) then
   begin
+    Form3.MsgLog.Clear;
     RefreshMap;
     Player.SetLocation(Player.X, 0);
   end;
@@ -129,9 +140,11 @@ begin
   begin
     Inc(Map.GetCurrentMap.FMap[lrObjects][TX][TY]);
     if (ObjType = 'closed_chest') then
+    begin
       Map.GetCurrentMap.FMap[lrItems][TX][TY] :=
         RandomRange(Map.GetCurrentMap.Firstgid[lrItems],
         Map.GetCurrentMap.Firstgid[lrMonsters]) - 1;
+    end;
     Exit;
   end;
 
@@ -142,6 +155,8 @@ begin
   if (MonType <> '') then
   begin
     Map.GetCurrentMap.FMap[lrMonsters][TX][TY] := -1;
+    Form1.AddToLog('Ты победил!');
+    Player.AddExp(10);
   end;
   Player.SetLocation(TX, TY);
 end;
@@ -152,9 +167,15 @@ var
 begin
   ObjType := Map.GetCurrentMap.GetTileType(lrObjects, Player.X, Player.Y);
   if (ObjType = 'up_stairs') and Map.Go(drMapTop) then
-    RefreshMap;;
+  begin
+    Form3.MsgLog.Clear;
+    RefreshMap;
+  end;
   if (ObjType = 'down_stairs') and Map.Go(drMapBottom) then
-    RefreshMap;;
+  begin
+    Form3.MsgLog.Clear;
+    RefreshMap;
+  end;
 end;
 
 procedure TForm1.FormKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
@@ -188,17 +209,63 @@ begin
             Y * Map.GetCurrentMap.TileSize, Map.GetCurrentMap.TiledObject
             [Map.GetCurrentMap.FMap[L][X][Y]].Image);
     end;
-  Surface.Canvas.Draw(Player.X * Map.GetCurrentMap.TileSize,
-    Player.Y * Map.GetCurrentMap.TileSize, Player.Image);
+  Player.Render(Surface);
   Canvas.Draw(0, 0, Surface);
+  Form2.Render;
+  Form3.Render;
 end;
 
-{ TPlayer }
-
-procedure TPlayer.SetLocation(AX, AY: Integer);
+procedure TForm1.FormResize(Sender: TObject);
+const
+  C = 8;
+var
+  MaxWidth: Integer;
 begin
-  Self.X := AX;
-  Self.Y := AY;
+  Left := C;
+  Top := C;
+  if Assigned(Form2) then
+  begin
+    Form2.Top := Top;
+    Form2.Left := Left + Width + C;
+    Form2.Height := Height;
+    Form2.Show;
+    Form1.SetFocus;
+  end;
+  if Assigned(Form3) then
+  begin
+    Form3.Top := Top + Height + C;
+    Form3.Left := Left;
+    Form3.Width := Width + C + Form2.Width;
+    Form3.Show;
+    Form1.SetFocus;
+  end;
+end;
+
+procedure TForm1.OnAddExp(Value: Integer);
+begin
+  Form1.AddToLog(Format('Опыт +%d.', [Value]));
+end;
+
+procedure TForm1.OnDead;
+begin
+
+end;
+
+procedure TForm1.OnLevel;
+begin
+  Player.Exp := Player.Exp - Player.MaxExp;
+  Player.MaxExp := Player.Level * 50;
+  if Player.Level > 1 then
+  begin
+    Player.MaxHP := Player.MaxHP + 2;
+    Player.MaxMP := Player.MaxMP + 5;
+    Form1.AddToLog('Новый уровень!');
+  end;
+end;
+
+procedure TForm1.OnModHP(Value: Integer);
+begin
+
 end;
 
 end.

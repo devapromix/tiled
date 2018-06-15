@@ -1,6 +1,7 @@
 object Form1: TForm1
   Left = 0
   Top = 0
+  BorderIcons = [biSystemMenu, biMinimize]
   Caption = 'Form1'
   ClientHeight = 225
   ClientWidth = 401
@@ -15,6 +16,7 @@ object Form1: TForm1
   OnDestroy = FormDestroy
   OnKeyUp = FormKeyUp
   OnPaint = FormPaint
+  OnResize = FormResize
   PixelsPerInch = 96
   TextHeight = 13
 end

@@ -45,7 +45,7 @@ type
 
 implementation
 
-uses System.SysUtils, Xml.XMLDoc, Xml.XMLIntf, System.IOUtils;
+uses System.SysUtils, Xml.XMLDoc, Xml.XMLIntf, System.IOUtils, Dialogs;
 
 { TTiledMap }
 
@@ -133,9 +133,8 @@ var
           SetLength(TiledObject, ID + 1);
           TiledObject[ID] := TTiledObject.Create;
           TiledObject[ID].TileType := TileType;
-          TiledObject[ID].Image.LoadFromFile
-            (GetPath('resources\images\' + Section) +
-            Trim(Node.Attributes['source']));
+          TiledObject[ID].Image.LoadFromFile(GetPath('resources') + Section +
+            '\' + Trim(Node.Attributes['source']));
           for J := 0 to PropCount - 1 do
           begin
             NodeProp := NodeProps.ChildNodes[J];
