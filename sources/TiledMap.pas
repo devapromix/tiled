@@ -45,7 +45,7 @@ type
 
 implementation
 
-uses System.SysUtils, Utils, Xml.XMLDoc, Xml.XMLIntf, System.IOUtils, Dialogs;
+uses System.SysUtils, Utils, Xml.XMLDoc, Xml.XMLIntf, System.IOUtils, Dialogs, Mods;
 
 { TTiledMap }
 
@@ -126,7 +126,7 @@ var
           SetLength(TiledObject, ID + 1);
           TiledObject[ID] := TTiledObject.Create;
           TiledObject[ID].TileType := TileType;
-          TiledObject[ID].Image.LoadFromFile(GetModPath('', Section + '\' + Trim(Node.Attributes['source'])));
+          TiledObject[ID].Image.LoadFromFile(GMods.GetPath('', Section + '\' + Trim(Node.Attributes['source'])));
           for J := 0 to PropCount - 1 do
           begin
             NodeProp := NodeProps.ChildNodes[J];
@@ -169,7 +169,7 @@ var
 begin
   ID := 0;
   XMLDoc := TXMLDocument.Create(FOwner);
-  XMLDoc.LoadFromFile(GetModPath('maps', FileName));
+  XMLDoc.LoadFromFile(GMods.GetPath('maps', FileName));
   try
     FTileSize := StrToIntDef(XMLDoc.DocumentElement.Attributes['tilewidth'], 32);
     FWidth := StrToIntDef(XMLDoc.DocumentElement.Attributes['width'], 100);
@@ -185,7 +185,7 @@ begin
       end;
       if Node.NodeName = 'tileset' then
       begin
-        S := GetModPath('maps', Trim(Node.Attributes['source']));
+        S := GMods.GetPath('maps', Trim(Node.Attributes['source']));
         Section := TPath.GetFileNameWithoutExtension(S);
         if Section = 'tiles' then
           Firstgid[lrTiles] := StrToInt(Trim(Node.Attributes['firstgid']));

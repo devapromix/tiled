@@ -32,12 +32,9 @@ var
 
 implementation
 
-uses Math, WorldMap, Utils, Unit2, Test.Player, Unit3;
+uses Math, WorldMap, Utils, Unit2, Test.Player, Unit3, Mods;
 
 {$R *.dfm}
-
-var
-  Map: TWorldMap;
 
 procedure RefreshMap;
 var
@@ -75,10 +72,9 @@ end;
 
 procedure TForm1.FormCreate(Sender: TObject);
 begin
-  SetCurrentModName('twforest');
-  //
   Map := TWorldMap.Create(Self);
-  Map.LoadFromFile('forest_of_bears.ini');
+//  GMods.SetCurrent('elvion');
+  GMods.SetCurrent('twilight_forest');
   //
   Surface := TBitmap.Create;
   // Player
@@ -88,7 +84,7 @@ begin
   Player.OnBeforeAddExp := OnAddExp;
   Player.OnMinHP := OnDead;
   Player.OnLevel;
-  Player.SetLocation(2, 3);
+  Player.SetLocation(GMods.PlayerX, GMods.PlayerY);
   //
   RefreshMap;
 end;

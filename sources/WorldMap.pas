@@ -31,9 +31,12 @@ type
     function Go(Dir: TDir): Boolean;
   end;
 
+var
+  Map: TWorldMap;
+
 implementation
 
-uses System.SysUtils, System.IniFiles, Utils;
+uses System.SysUtils, System.IniFiles, Utils, Mods;
 
 { TWorldMap }
 
@@ -105,7 +108,7 @@ var
   F: TIniFile;
 begin
   FCurrentMap := 0;
-  F := TIniFile.Create(GetModPath('maps', FileName));
+  F := TIniFile.Create(GMods.GetPath('maps', FileName));
   try
     FSections.Clear;
     F.ReadSections(FSections);
