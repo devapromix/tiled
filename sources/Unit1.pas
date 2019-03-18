@@ -82,6 +82,7 @@ begin
   //
   Surface := TBitmap.Create;
   // Player
+  Player := TPlayer.Create;
   Player.OnLevel := OnLevel;
   Player.OnModHP := OnModHP;
   Player.OnBeforeAddExp := OnAddExp;
@@ -94,6 +95,7 @@ end;
 
 procedure TForm1.FormDestroy(Sender: TObject);
 begin
+  FreeAndNil(Player);
   FreeAndNil(Surface);
   FreeAndNil(Map);
 end;

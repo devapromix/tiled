@@ -68,8 +68,7 @@ begin
   inherited;
 end;
 
-function TTiledMap.GetTileType(const L: TLayerEnum;
-  const X, Y: Integer): string;
+function TTiledMap.GetTileType(const L: TLayerEnum; const X, Y: Integer): string;
 begin
   Result := '';
   if (FMap[L][X][Y] > 0) then
@@ -80,7 +79,7 @@ procedure TTiledMap.LoadFromFile(const FileName: string);
 var
   XMLDoc: TXMLDocument;
   Node: IXMLNode;
-  S, F, LayerName: string;
+  S, LayerName: string;
   Section: string;
   I, Count, ID: Integer;
 
@@ -127,8 +126,7 @@ var
           SetLength(TiledObject, ID + 1);
           TiledObject[ID] := TTiledObject.Create;
           TiledObject[ID].TileType := TileType;
-          TiledObject[ID].Image.LoadFromFile(GetModPath('') + Section +
-            '\' + Trim(Node.Attributes['source']));
+          TiledObject[ID].Image.LoadFromFile(GetModPath('', Section + '\' + Trim(Node.Attributes['source'])));
           for J := 0 to PropCount - 1 do
           begin
             NodeProp := NodeProps.ChildNodes[J];
@@ -171,11 +169,9 @@ var
 begin
   ID := 0;
   XMLDoc := TXMLDocument.Create(FOwner);
-  F := GetModPath('maps');
-  XMLDoc.LoadFromFile(F + FileName);
+  XMLDoc.LoadFromFile(GetModPath('maps', FileName));
   try
-    FTileSize := StrToIntDef(XMLDoc.DocumentElement.Attributes
-      ['tilewidth'], 32);
+    FTileSize := StrToIntDef(XMLDoc.DocumentElement.Attributes['tilewidth'], 32);
     FWidth := StrToIntDef(XMLDoc.DocumentElement.Attributes['width'], 100);
     FHeight := StrToIntDef(XMLDoc.DocumentElement.Attributes['height'], 100);
     Count := XMLDoc.DocumentElement.ChildNodes.Count;
@@ -189,7 +185,7 @@ begin
       end;
       if Node.NodeName = 'tileset' then
       begin
-        S := F + Trim(Node.Attributes['source']);
+        S := GetModPath('maps', Trim(Node.Attributes['source']));
         Section := TPath.GetFileNameWithoutExtension(S);
         if Section = 'tiles' then
           Firstgid[lrTiles] := StrToInt(Trim(Node.Attributes['firstgid']));

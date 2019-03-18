@@ -4,17 +4,17 @@ interface
 
 function GetPath(SubDir: string): string;
 procedure SetCurrentModName(const ModName: string);
-function GetModPath(SubDir: string): string;
+function GetModPath(const SubDir, FileName: string): string;
 
 implementation
 
-uses SysUtils;
+uses SysUtils, Dialogs;
 
 const
   DefaultModName = 'elvion';
 
 var
-  GameModName: string = DefaultModName;
+  CurrentModName: string = DefaultModName;
 
 function GetPath(SubDir: string): string;
 begin
@@ -24,13 +24,14 @@ end;
 
 procedure SetCurrentModName(const ModName: string);
 begin
-  GameModName := ModName;
+  CurrentModName := ModName;
 end;
 
-function GetModPath(SubDir: string): string;
+function GetModPath(const SubDir, FileName: string): string;
 begin
-  Result := ExtractFilePath(ParamStr(0));
-  Result := IncludeTrailingPathDelimiter(Result + 'mods' + PathDelim + GameModName + PathDelim + SubDir);
+  Result := GetPath('mods' + PathDelim + CurrentModName + PathDelim + SubDir) + FileName;
+  if not FileExists(Result) then
+    Result := GetPath('mods' + PathDelim + DefaultModName + PathDelim + SubDir) + FileName;
 end;
 
 end.

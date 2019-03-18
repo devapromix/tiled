@@ -105,7 +105,7 @@ var
   F: TIniFile;
 begin
   FCurrentMap := 0;
-  F := TIniFile.Create(GetModPath('maps') + FileName);
+  F := TIniFile.Create(GetModPath('maps', FileName));
   try
     FSections.Clear;
     F.ReadSections(FSections);

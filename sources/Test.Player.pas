@@ -29,7 +29,7 @@ constructor TPlayer.Create;
 begin
   inherited;
   FImage := TPNGImage.Create;
-  FImage.LoadFromFile(GetModPath('races') + 'human.png');
+  FImage.LoadFromFile(GetModPath('races', 'human.png'));
   FWidth := FImage.Width;
   FHeight := FImage.Height;
 end;
@@ -44,13 +44,5 @@ procedure TPlayer.Render(Surface: TBitmap);
 begin
   Surface.Canvas.Draw(X * FWidth, Y * FHeight, FImage);
 end;
-
-initialization
-
-Player := TPlayer.Create;
-
-finalization
-
-FreeAndNil(Player);
 
 end.
