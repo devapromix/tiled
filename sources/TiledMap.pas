@@ -45,15 +45,9 @@ type
 
 implementation
 
-uses System.SysUtils, Xml.XMLDoc, Xml.XMLIntf, System.IOUtils, Dialogs;
+uses System.SysUtils, Utils, Xml.XMLDoc, Xml.XMLIntf, System.IOUtils, Dialogs, GameMod;
 
 { TTiledMap }
-
-function GetPath(SubDir: string): string;
-begin
-  Result := ExtractFilePath(ParamStr(0));
-  Result := IncludeTrailingPathDelimiter(Result + SubDir);
-end;
 
 constructor TTiledMap.Create(AOwner: TComponent);
 begin
@@ -133,7 +127,7 @@ var
           SetLength(TiledObject, ID + 1);
           TiledObject[ID] := TTiledObject.Create;
           TiledObject[ID].TileType := TileType;
-          TiledObject[ID].Image.LoadFromFile(GetPath('resources') + Section +
+          TiledObject[ID].Image.LoadFromFile(GetModPath('') + Section +
             '\' + Trim(Node.Attributes['source']));
           for J := 0 to PropCount - 1 do
           begin
@@ -177,7 +171,7 @@ var
 begin
   ID := 0;
   XMLDoc := TXMLDocument.Create(FOwner);
-  F := GetPath('resources\maps');
+  F := GetModPath('maps');
   XMLDoc.LoadFromFile(F + FileName);
   try
     FTileSize := StrToIntDef(XMLDoc.DocumentElement.Attributes

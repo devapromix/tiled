@@ -21,13 +21,7 @@ var
 
 implementation
 
-uses System.SysUtils;
-
-function GetPath(SubDir: string): string;
-begin
-  Result := ExtractFilePath(ParamStr(0));
-  Result := IncludeTrailingPathDelimiter(Result + SubDir);
-end;
+uses System.SysUtils, Utils, GameMod;
 
 { TPlayer }
 
@@ -35,7 +29,7 @@ constructor TPlayer.Create;
 begin
   inherited;
   FImage := TPNGImage.Create;
-  FImage.LoadFromFile(GetPath('resources\races') + 'human.png');
+  FImage.LoadFromFile(GetModPath('races') + 'human.png');
   FWidth := FImage.Width;
   FHeight := FImage.Height;
 end;

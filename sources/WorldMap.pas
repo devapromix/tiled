@@ -33,15 +33,9 @@ type
 
 implementation
 
-uses System.SysUtils, System.IniFiles;
+uses System.SysUtils, System.IniFiles, Utils, GameMod;
 
 { TWorldMap }
-
-function GetPath(SubDir: string): string;
-begin
-  Result := ExtractFilePath(ParamStr(0));
-  Result := IncludeTrailingPathDelimiter(Result + SubDir);
-end;
 
 function TWorldMap.Count: Integer;
 begin
@@ -111,7 +105,7 @@ var
   F: TIniFile;
 begin
   FCurrentMap := 0;
-  F := TIniFile.Create(GetPath('resources\maps') + FileName);
+  F := TIniFile.Create(GetModPath('maps') + FileName);
   try
     FSections.Clear;
     F.ReadSections(FSections);
@@ -120,17 +114,12 @@ begin
     for I := 0 to Count - 1 do
     begin
       FMapInfo[I].FileName := Trim(FSections[I]);
-      FMapInfo[I].Neighbors[drMapLeft] := F.ReadString(FSections[I],
-        'MapLeft', '');
+      FMapInfo[I].Neighbors[drMapLeft] := F.ReadString(FSections[I], 'MapLeft', '');
       FMapInfo[I].Neighbors[drMapUp] := F.ReadString(FSections[I], 'MapUp', '');
-      FMapInfo[I].Neighbors[drMapRight] := F.ReadString(FSections[I],
-        'MapRight', '');
-      FMapInfo[I].Neighbors[drMapDown] := F.ReadString(FSections[I],
-        'MapDown', '');
-      FMapInfo[I].Neighbors[drMapTop] := F.ReadString(FSections[I],
-        'MapTop', '');
-      FMapInfo[I].Neighbors[drMapBottom] := F.ReadString(FSections[I],
-        'MapBottom', '');
+      FMapInfo[I].Neighbors[drMapRight] := F.ReadString(FSections[I], 'MapRight', '');
+      FMapInfo[I].Neighbors[drMapDown] := F.ReadString(FSections[I], 'MapDown', '');
+      FMapInfo[I].Neighbors[drMapTop] := F.ReadString(FSections[I], 'MapTop', '');
+      FMapInfo[I].Neighbors[drMapBottom] := F.ReadString(FSections[I], 'MapBottom', '');
       FTiledMap[I] := TTiledMap.Create(FOwner);
       FTiledMap[I].LoadFromFile(Format('%s.tmx', [FMapInfo[I].FileName]));
     end;

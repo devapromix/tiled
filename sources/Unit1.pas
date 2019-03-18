@@ -32,18 +32,12 @@ var
 
 implementation
 
-uses Math, WorldMap, Unit2, Test.Player, Unit3;
+uses Math, WorldMap, Utils, Unit2, Test.Player, Unit3;
 
 {$R *.dfm}
 
 var
   Map: TWorldMap;
-
-function GetPath(SubDir: string): string;
-begin
-  Result := ExtractFilePath(ParamStr(0));
-  Result := IncludeTrailingPathDelimiter(Result + SubDir);
-end;
 
 procedure RefreshMap;
 var
@@ -52,10 +46,12 @@ begin
   with Form1 do
   begin
     Caption := Format('%s (%d)', [Map.GetCurrentMap.Name, Map.GetCurrentMap.Level]);
-    W:= Map.GetCurrentMap.TileSize * Map.GetCurrentMap.Width;
-    H:= Map.GetCurrentMap.TileSize * Map.GetCurrentMap.Height;
-    ClientWidth := Max(W, Screen.Width);
-    ClientHeight := Max(H, Screen.Height);
+    W := Map.GetCurrentMap.TileSize * Map.GetCurrentMap.Width;
+    H := Map.GetCurrentMap.TileSize * Map.GetCurrentMap.Height;
+     ClientWidth := Max(W, Screen.Width);
+     ClientHeight := Max(H, Screen.Height);
+    //ClientWidth := W;
+    //ClientHeight := H;
     Surface.Width := ClientWidth;
     Surface.Height := ClientHeight;
     Constraints.MinWidth := Width;
@@ -189,6 +185,8 @@ end;
 procedure TForm1.FormKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
 begin
   case Key of
+    Ord('I'):
+      ;
     37:
       Move(-1, 0);
     39:
@@ -200,7 +198,7 @@ begin
     13, 32:
       Use;
     27:
-    Close;
+      Close;
   end;
   FormPaint(Sender);
 end;
@@ -225,26 +223,22 @@ begin
 end;
 
 procedure TForm1.FormResize(Sender: TObject);
-const
-  C = 8;
 var
   MaxWidth: Integer;
 begin
-  Left := C;
-  Top := C;
   if Assigned(Form2) then
   begin
     Form2.Top := Top;
-    Form2.Left := Left + Width + C;
+    Form2.Left := Left + Width;
     Form2.Height := Height;
     Form2.Show;
     Form1.SetFocus;
   end;
   if Assigned(Form3) then
   begin
-    Form3.Top := Top + Height + C;
+    Form3.Top := Top + Height;
     Form3.Left := Left;
-    Form3.Width := Width + C + Form2.Width;
+    Form3.Width := Width + Form2.Width;
     Form3.Show;
     Form1.SetFocus;
   end;
