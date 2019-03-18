@@ -45,7 +45,7 @@ type
 
 implementation
 
-uses System.SysUtils, Utils, Xml.XMLDoc, Xml.XMLIntf, System.IOUtils, Dialogs, GameMod;
+uses System.SysUtils, Utils, Xml.XMLDoc, Xml.XMLIntf, System.IOUtils, Dialogs;
 
 { TTiledMap }
 

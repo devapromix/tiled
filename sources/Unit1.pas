@@ -75,6 +75,8 @@ end;
 
 procedure TForm1.FormCreate(Sender: TObject);
 begin
+  SetCurrentModName('twforest');
+  //
   Map := TWorldMap.Create(Self);
   Map.LoadFromFile('forest_of_bears.ini');
   //

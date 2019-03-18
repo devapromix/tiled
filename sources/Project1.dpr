@@ -9,7 +9,6 @@ uses
   Creature in 'Creature.pas',
   Test.Player in 'Test.Player.pas',
   Unit3 in 'Unit3.pas' {Form3},
-  GameMod in 'GameMod.pas',
   Utils in 'Utils.pas';
 
 {$R *.res}

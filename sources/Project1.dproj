@@ -119,7 +119,6 @@
             <Form>Form3</Form>
             <FormType>dfm</FormType>
         </DCCReference>
-        <DCCReference Include="GameMod.pas"/>
         <DCCReference Include="Utils.pas"/>
         <BuildConfiguration Include="Release">
             <Key>Cfg_2</Key>

@@ -21,7 +21,7 @@ var
 
 implementation
 
-uses System.SysUtils, Utils, GameMod;
+uses System.SysUtils, Utils;
 
 { TPlayer }
 

@@ -33,7 +33,7 @@ type
 
 implementation
 
-uses System.SysUtils, System.IniFiles, Utils, GameMod;
+uses System.SysUtils, System.IniFiles, Utils;
 
 { TWorldMap }
 
