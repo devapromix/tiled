@@ -15,7 +15,6 @@ object Form2: TForm2
   OnActivate = FormClick
   OnClick = FormClick
   OnCreate = FormCreate
-  OnResize = FormResize
   PixelsPerInch = 96
   TextHeight = 20
   object Label1: TLabel

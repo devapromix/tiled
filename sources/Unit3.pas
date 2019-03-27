@@ -11,7 +11,6 @@ type
   TForm3 = class(TForm)
     MsgLog: TRichEdit;
     procedure FormClick(Sender: TObject);
-    procedure FormResize(Sender: TObject);
   private
     { Private declarations }
   public
@@ -33,12 +32,6 @@ uses Unit1;
 
 procedure TForm3.FormClick(Sender: TObject);
 begin
-  Form1.SetFocus;
-end;
-
-procedure TForm3.FormResize(Sender: TObject);
-begin
-  Form1.FormResize(Sender);
   Form1.SetFocus;
 end;
 

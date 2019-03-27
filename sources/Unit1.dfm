@@ -2,10 +2,10 @@ object Form1: TForm1
   Left = 0
   Top = 0
   BorderIcons = [biSystemMenu, biMinimize]
-  BorderStyle = bsNone
+  BorderStyle = bsSingle
   Caption = 'Form1'
-  ClientHeight = 156
-  ClientWidth = 254
+  ClientHeight = 128
+  ClientWidth = 248
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
@@ -17,7 +17,6 @@ object Form1: TForm1
   OnDestroy = FormDestroy
   OnKeyDown = FormKeyDown
   OnPaint = FormPaint
-  OnResize = FormResize
   PixelsPerInch = 96
   TextHeight = 13
 end

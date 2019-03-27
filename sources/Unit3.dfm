@@ -14,7 +14,6 @@ object Form3: TForm3
   OldCreateOrder = False
   OnActivate = FormClick
   OnClick = FormClick
-  OnResize = FormResize
   PixelsPerInch = 96
   TextHeight = 13
   object MsgLog: TRichEdit
@@ -32,7 +31,5 @@ object Form3: TForm3
     ParentFont = False
     TabOrder = 0
     Zoom = 100
-    ExplicitLeft = 216
-    ExplicitTop = 40
   end
 end

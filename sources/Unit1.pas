@@ -12,7 +12,6 @@ type
     procedure FormCreate(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
     procedure FormPaint(Sender: TObject);
-    procedure FormResize(Sender: TObject);
     procedure FormKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
   private
     { Private declarations }
@@ -45,10 +44,8 @@ begin
     Caption := Format('%s (%d)', [Map.GetCurrentMap.Name, Map.GetCurrentMap.Level]);
     W := Map.GetCurrentMap.TileSize * Map.GetCurrentMap.Width;
     H := Map.GetCurrentMap.TileSize * Map.GetCurrentMap.Height;
-     ClientWidth := Max(W, Screen.Width);
-     ClientHeight := Max(H, Screen.Height);
-    //ClientWidth := W;
-    //ClientHeight := H;
+    ClientWidth := Min(W, Screen.Width);
+    ClientHeight := Min(H, Screen.Height);
     Surface.Width := ClientWidth;
     Surface.Height := ClientHeight;
     Constraints.MinWidth := Width;
@@ -73,7 +70,7 @@ end;
 procedure TForm1.FormCreate(Sender: TObject);
 begin
   Map := TWorldMap.Create(Self);
-//  GMods.SetCurrent('elvion');
+  // GMods.SetCurrent('elvion');
   GMods.SetCurrent('twilight_forest');
   //
   Surface := TBitmap.Create;
@@ -220,28 +217,6 @@ begin
   Canvas.Draw(0, 0, Surface);
   Form2.Render;
   Form3.Render;
-end;
-
-procedure TForm1.FormResize(Sender: TObject);
-var
-  MaxWidth: Integer;
-begin
-  if Assigned(Form2) then
-  begin
-    Form2.Top := Top;
-    Form2.Left := Left + Width;
-    Form2.Height := Height;
-    Form2.Show;
-    Form1.SetFocus;
-  end;
-  if Assigned(Form3) then
-  begin
-    Form3.Top := Top + Height;
-    Form3.Left := Left;
-    Form3.Width := Width + Form2.Width;
-    Form3.Show;
-    Form1.SetFocus;
-  end;
 end;
 
 procedure TForm1.OnAddExp(Value: Integer);

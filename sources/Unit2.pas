@@ -16,7 +16,6 @@ type
     Label5: TLabel;
     Label6: TLabel;
     procedure FormClick(Sender: TObject);
-    procedure FormResize(Sender: TObject);
     procedure FormCreate(Sender: TObject);
   private
     { Private declarations }
@@ -42,12 +41,6 @@ end;
 procedure TForm2.FormCreate(Sender: TObject);
 begin
   Constraints.MinWidth := Width;
-end;
-
-procedure TForm2.FormResize(Sender: TObject);
-begin
-  Form1.FormResize(Sender);
-  Form1.SetFocus;
 end;
 
 procedure TForm2.Render;
