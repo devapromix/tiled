@@ -33,8 +33,9 @@ type
     constructor Create;
     destructor Destroy; override;
     procedure Clear;
-    procedure InitFromCurMap;
-    procedure Add(const Force, X, Y, Id: Integer; N: string; L, R: Integer);
+    procedure LoadFromMap(const N: Integer);
+    procedure Add(const Force, X, Y, Id: Integer; N: string; L, MaxL, R: Integer); overload;
+    procedure Add(const P: TMobInfo); overload;
     function BarWidth(CX, MX, GS: Integer): Integer;
     function Count: Integer;
     function Get(I: Integer): TMobInfo;
@@ -47,19 +48,6 @@ type
     procedure SetPosition(const I, X, Y: Integer);
     function GetDist(FromX, FromY, ToX, ToY: Single): Word;
   end;
-  {
-    type
-    TCorp = class(TObject)
-    private
-
-    public
-    constructor Create;
-    destructor Destroy; override;
-
-    end; }
-
-var
-  Mob: TMobs;
 
 implementation
 
@@ -95,14 +83,19 @@ begin
   Result := I;
 end;
 
-procedure TMobs.Add(const Force, X, Y, Id: Integer; N: string; L, R: Integer);
+procedure TMobs.Add(const Force, X, Y, Id: Integer; N: string; L, MaxL, R: Integer);
 begin
   FForce.Append(Force.ToString);
   FCoord.Append(Format(F, [X, Y]));
   FID.Append(Id.ToString);
   FName.Append(N);
-  FLife.Append(Format(F, [L, L]));
+  FLife.Append(Format(F, [L, MaxL]));
   FRad.Append(R.ToString);
+end;
+
+procedure TMobs.Add(const P: TMobInfo);
+begin
+  Self.Add(P.Force, P.X, P.Y, P.Id, P.Name, P.Life, P.MaxLife, P.Radius);
 end;
 
 procedure TMobs.Clear;
@@ -122,8 +115,10 @@ end;
 
 constructor TMobs.Create;
 begin
+  PlayerID := -1;
   MobLB := TBitmap.Create;
   Lifebar := TPNGImage.Create;
+  Lifebar.LoadFromFile(GMods.GetPath('images', 'lifebar.png'));
   FForce := TStringList.Create;
   FCoord := TStringList.Create;
   FID := TStringList.Create;
@@ -187,32 +182,31 @@ begin
   Result := FCoord.IndexOf(Format(F, [X, Y]));
 end;
 
-procedure TMobs.InitFromCurMap;
+procedure TMobs.LoadFromMap(const N: Integer);
 var
   I, J, F, X, Y: Integer;
 begin
   J := 0;
-  for Y := 0 to Map.GetCurrentMap.Height - 1 do
-    for X := 0 to Map.GetCurrentMap.Width - 1 do
+  for Y := 0 to Map.GetMap(N).Height - 1 do
+    for X := 0 to Map.GetMap(N).Width - 1 do
     begin
       F := 0;
-      I := Map.GetCurrentMap.FMap[lrMonsters][X][Y];
+      I := Map.GetMap(N).FMap[lrMonsters][X][Y];
       if I >= 0 then
       begin
-        with Map.GetCurrentMap.TiledObject[I] do
+        with Map.GetMap(N).TiledObject[I] do
         begin
           if LowerCase(Name) = 'human' then
           begin
             PlayerID := J;
             F := 1;
           end;
-          Add(F, X, Y, I, Name, Life, Radius);
+          Add(F, X, Y, I, Name, Life, Life, Radius);
           Inc(J);
         end;
       end;
     end;
   //
-  Lifebar.LoadFromFile(GMods.GetPath('images', 'lifebar.png'));
 end;
 
 procedure TMobs.ModLife(const Index, Value: Integer);
@@ -241,8 +235,8 @@ begin
       Enm := Get(I);
       NX := 0;
       NY := 0;
-      if (Mob.GetDist(Enm.X, Enm.Y, Plr.X, Plr.Y) > Enm.Radius) or not IsPathFind(Map.GetCurrentMap.Width, Map.GetCurrentMap.Height, Enm.X, Enm.Y,
-        Plr.X, Plr.Y, @IsTile, NX, NY) then
+      if (GetDist(Enm.X, Enm.Y, Plr.X, Plr.Y) > Enm.Radius) or not IsPathFind(Map.GetCurrentMap.Width, Map.GetCurrentMap.Height, Enm.X, Enm.Y, Plr.X,
+        Plr.Y, @IsTile, NX, NY) then
         Continue;
       MoveToPosition(I, NX, NY);
     end;
@@ -293,7 +287,7 @@ begin
     if Atk.Force <> Def.Force then
     begin
       begin
-        if (Math.RandomRange(0, 3 + 1) > 6) then .......
+        if (Math.RandomRange(0, 3 + 1) >= Math.RandomRange(0, 3 + 1)) then
         begin
           Dam := Math.RandomRange(2, 3 + 1);
           ModLife(DefId, -Dam);
@@ -325,13 +319,5 @@ procedure TMobs.SetPosition(const I, X, Y: Integer);
 begin
   FCoord[I] := Format(F, [X, Y]);
 end;
-
-initialization
-
-Mob := TMobs.Create;
-
-finalization
-
-FreeAndNil(Mob);
 
 end.

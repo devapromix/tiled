@@ -50,7 +50,8 @@ end;
 procedure TForm1.FormCreate(Sender: TObject);
 begin
   Map := TWorldMap.Create(Self);
-  GMods.SetCurrent('twilight_forest'); // GMods.SetCurrent('elvion');
+  //GMods.SetCurrent('twilight_forest');
+   GMods.SetCurrent('elvion');
   Surface := TBitmap.Create;
   RefreshMap;
 end;
@@ -65,12 +66,6 @@ procedure Move(X, Y: Integer);
 var
   TX, TY, I: Integer;
   TileType, ObjType, ItemType: string;
-
-  procedure DelMob();
-  begin
-    Mob.Del(I);
-    Map.GetCurrentMap.FMap[lrMonsters][TX][TY] := -1;
-  end;
 
 begin
   { TX := Player.X + X;
@@ -129,7 +124,7 @@ begin
   end;
 
   // Mobs
-  I := Mob.IndexOf(TX, TY);
+{  I := Mob.IndexOf(TX, TY);
   if I >= 0 then
   begin
     if Mob.Get(I).Life > 0 then
@@ -150,22 +145,26 @@ begin
   // Player.SetLocation(TX, TY);
   //
   // if Math.RandomRange(0, 9) = 0 then
-  // Player.ModHP(1);
+  // Player.ModHP(1); }
 end;
 
 procedure Use;
-begin {
-    ObjType := Map.GetCurrentMap.GetTileType(lrObjects, Player.X, Player.Y);
-    if (ObjType = 'up_stairs') and Map.Go(drMapTop) then
-    begin
-    Form3.MsgLog.Clear;
+var
+  ObjType: string;
+  M: TMobInfo;
+begin
+  M := Map.GetCurrentMapMobs.Get(Map.GetCurrentMapMobs.PlayerID);
+  ObjType := Map.GetCurrentMap.GetTileType(lrObjects, M.X, M.Y);
+  if (ObjType = 'up_stairs') and Map.Go(drMapTop) then
+  begin
+    // Form3.MsgLog.Clear;
     RefreshMap;
-    end;
-    if (ObjType = 'down_stairs') and Map.Go(drMapBottom) then
-    begin
-    Form3.MsgLog.Clear;
+  end;
+  if (ObjType = 'down_stairs') and Map.Go(drMapBottom) then
+  begin
+    // Form3.MsgLog.Clear;
     RefreshMap;
-    end; }
+  end;
 end;
 
 procedure TForm1.FormKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
@@ -175,19 +174,19 @@ begin
       ;
     37:
       begin
-        Mob.Move(-1, 0);
+        Map.GetCurrentMapMobs.Move(-1, 0);
       end;
     39:
       begin
-        Mob.Move(1, 0);
+        Map.GetCurrentMapMobs.Move(1, 0);
       end;
     38:
       begin
-        Mob.Move(0, -1);
+        Map.GetCurrentMapMobs.Move(0, -1);
       end;
     40:
       begin
-        Mob.Move(0, 1);
+        Map.GetCurrentMapMobs.Move(0, 1);
       end;
     13, 32:
       Use;
@@ -212,14 +211,14 @@ begin
             Map.GetCurrentMap.TiledObject[Map.GetCurrentMap.FMap[L][X][Y]].Image);
     end;
   // Mobs
-  for I := 0 to Mob.Count - 1 do
+  for I := 0 to Map.GetCurrentMapMobs.Count - 1 do
   begin
-    M := Mob.Get(I);
-    Mob.MobLB.Assign(Mob.Lifebar);
-    Mob.MobLB.Width := Mob.BarWidth(M.Life, M.MaxLife, 30);
+    M := Map.GetCurrentMapMobs.Get(I);
+    Map.GetCurrentMapMobs.MobLB.Assign(Map.GetCurrentMapMobs.Lifebar);
+    Map.GetCurrentMapMobs.MobLB.Width := Map.GetCurrentMapMobs.BarWidth(M.Life, M.MaxLife, 30);
     X := M.X * Map.GetCurrentMap.TileSize;
     Y := M.Y * Map.GetCurrentMap.TileSize;
-    Surface.Canvas.Draw(X + 1, Y, Mob.MobLB);
+    Surface.Canvas.Draw(X + 1, Y, Map.GetCurrentMapMobs.MobLB);
     Surface.Canvas.Draw(X, Y, Map.GetCurrentMap.TiledObject[M.Id].Image);
   end;
   Canvas.Draw(0, 0, Surface);

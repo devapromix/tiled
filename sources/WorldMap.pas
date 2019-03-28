@@ -2,7 +2,7 @@ unit WorldMap;
 
 interface
 
-uses System.Classes, TiledMap;
+uses System.Classes, TiledMap, Mobs;
 
 type
   TWorldMap = class(TObject)
@@ -16,6 +16,7 @@ type
   private
     FMapInfo: array of TMapInfo;
     FTiledMap: array of TTiledMap;
+    FTiledMapMobs: array of TMobs;
     FCurrentMap: Integer;
     FSections: TStringList;
     FOwner: TComponent;
@@ -26,8 +27,11 @@ type
     function Count: Integer;
     property CurrentMap: Integer read FCurrentMap;
     function GetMapIndex(SectionName: string): Integer;
+    function GetMap(I: Integer): TTiledMap;
     function GetCurrentMapInfo: TMapInfo;
     function GetCurrentMap: TTiledMap;
+    function GetMapMobs(I: Integer): TMobs;
+    function GetCurrentMapMobs: TMobs;
     function Go(Dir: TDir): Boolean;
   end;
 
@@ -36,7 +40,7 @@ var
 
 implementation
 
-uses System.SysUtils, System.IniFiles, Utils, Mods;
+uses System.SysUtils, Dialogs, System.IniFiles, Utils, Mods;
 
 { TWorldMap }
 
@@ -57,7 +61,10 @@ var
   I: Integer;
 begin
   for I := 0 to Count - 1 do
+  begin
     FreeAndNil(FTiledMap[I]);
+    FreeAndNil(FTiledMapMobs[I]);
+  end;
   FreeAndNil(FSections);
   inherited;
 end;
@@ -70,6 +77,16 @@ end;
 function TWorldMap.GetCurrentMapInfo: TMapInfo;
 begin
   Result := FMapInfo[FCurrentMap];
+end;
+
+function TWorldMap.GetCurrentMapMobs: TMobs;
+begin
+  Result := FTiledMapMobs[FCurrentMap];
+end;
+
+function TWorldMap.GetMap(I: Integer): TTiledMap;
+begin
+  Result := FTiledMap[I];
 end;
 
 function TWorldMap.GetMapIndex(SectionName: string): Integer;
@@ -85,10 +102,16 @@ begin
     end;
 end;
 
+function TWorldMap.GetMapMobs(I: Integer): TMobs;
+begin
+  Result := FTiledMapMobs[I];
+end;
+
 function TWorldMap.Go(Dir: TDir): Boolean;
 var
   NextMapFileName: string;
-  I: Integer;
+  I, J: Integer;
+  P: TMobInfo;
 begin
   Result := False;
   NextMapFileName := GetCurrentMapInfo.Neighbors[Dir];
@@ -97,6 +120,22 @@ begin
     I := GetMapIndex(NextMapFileName);
     if (I < 0) then
       Exit;
+    with GetCurrentMapMobs do
+    begin
+      P := Get(PlayerID);
+      Del(PlayerID);
+      PlayerID := -1;
+      GetMapMobs(I).Add(P);
+      for J := 0 to GetMapMobs(I).Count - 1 do
+      begin
+        P := GetMapMobs(I).Get(J);
+        if P.Force = 1 then
+        begin
+          GetMapMobs(I).PlayerID := J;
+          Break;
+        end;
+      end;
+    end;
     FCurrentMap := I;
     Result := True;
   end;
@@ -114,6 +153,7 @@ begin
     F.ReadSections(FSections);
     SetLength(FMapInfo, Count);
     SetLength(FTiledMap, Count);
+    SetLength(FTiledMapMobs, Count);
     for I := 0 to Count - 1 do
     begin
       FMapInfo[I].FileName := Trim(FSections[I]);
@@ -125,6 +165,8 @@ begin
       FMapInfo[I].Neighbors[drMapBottom] := F.ReadString(FSections[I], 'MapBottom', '');
       FTiledMap[I] := TTiledMap.Create(FOwner);
       FTiledMap[I].LoadFromFile(Format('%s.tmx', [FMapInfo[I].FileName]));
+      FTiledMapMobs[I] := TMobs.Create;
+      FTiledMapMobs[I].LoadFromMap(I);
     end;
   finally
     FreeAndNil(F);

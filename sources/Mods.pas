@@ -85,7 +85,6 @@ begin
   FSL.LoadFromFile(GetPath('', 'mod.cfg'), TEncoding.UTF8);
   FN := GetCurValue('World', '');
   Map.LoadFromFile(FN);
-  Mob.InitFromCurMap;
 end;
 
 initialization
