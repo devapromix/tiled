@@ -25,7 +25,7 @@ var
 
 implementation
 
-uses Math, WorldMap, Utils, Unit2, Test.Player, Unit3, Mods, Mobs;
+uses Math, WorldMap, Utils, Mods, Mobs;
 
 {$R *.dfm}
 
@@ -50,8 +50,8 @@ end;
 procedure TForm1.FormCreate(Sender: TObject);
 begin
   Map := TWorldMap.Create(Self);
-  //GMods.SetCurrent('twilight_forest');
-   GMods.SetCurrent('elvion');
+  GMods.SetCurrent('twilight_forest');
+  // GMods.SetCurrent('elvion');
   Surface := TBitmap.Create;
   RefreshMap;
 end;
@@ -122,30 +122,6 @@ begin
   begin
     Map.GetCurrentMap.FMap[lrItems][TX][TY] := -1;
   end;
-
-  // Mobs
-{  I := Mob.IndexOf(TX, TY);
-  if I >= 0 then
-  begin
-    if Mob.Get(I).Life > 0 then
-    begin
-      Mob.ModLife(I, -3);
-      if Mob.Get(I).Life = 0 then
-        DelMob()
-      else
-      begin
-        // if Math.RandomRange(0, 3) = 0 then
-        // Player.ModHP(-1);
-        Exit;
-      end
-    end
-    else
-      DelMob();
-  end;
-  // Player.SetLocation(TX, TY);
-  //
-  // if Math.RandomRange(0, 9) = 0 then
-  // Player.ModHP(1); }
 end;
 
 procedure Use;
