@@ -10,7 +10,9 @@ uses
   Test.Player in 'Test.Player.pas',
   Unit3 in 'Unit3.pas' {Form3},
   Utils in 'Utils.pas',
-  Mods in 'Mods.pas';
+  Mods in 'Mods.pas',
+  Mobs in 'Mobs.pas',
+  PathFind in 'PathFind.pas';
 
 {$R *.res}
 

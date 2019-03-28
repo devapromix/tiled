@@ -45,12 +45,6 @@ end;
 
 procedure TForm2.Render;
 begin
-  Label1.Caption := Format('%s, %s, %s', ['Player', 'Human', 'Warrior']);
-  Label2.Caption := Format('Level %d, (%d/%d)', [Player.Level, Player.Exp,
-    Player.MaxExp]);
-  Label3.Caption := Format('HP: %d/%d', [Player.HP, Player.MaxHP]);
-  Label4.Caption := Format('MP: %d/%d', [Player.MP, Player.MaxMP]);
-  Label6.Caption := Format('%dx%d', [Player.X, Player.Y]);
 end;
 
 end.

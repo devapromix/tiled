@@ -22,7 +22,11 @@ type
     private
     public
       Image: TPNGImage;
+      Name: string;
       TileType: string;
+      Level: Integer;
+      Life: Integer;
+      Radius: Integer;
       Passable: Boolean;
       Transparent: Boolean;
       constructor Create;
@@ -138,6 +142,20 @@ var
                 TiledObject[ID].Passable := StrToBool(Value);
               if (Name = 'transparent') then
                 TiledObject[ID].Transparent := StrToBool(Value);
+            end;
+            if Section = 'monsters' then
+            begin
+              Name := NodeProp.Attributes['name'];
+              Value := NodeProp.Attributes['value'];
+              //ShowMessage(Value);
+              if (Name = 'name') then
+                TiledObject[ID].Name := Trim(Value);
+              if (Name = 'level') then
+                TiledObject[ID].Level := StrToInt(Value);
+              if (Name = 'life') then
+                TiledObject[ID].Life := StrToInt(Value);
+              if (Name = 'radius') then
+                TiledObject[ID].Radius := StrToInt(Value);
             end;
           end;
           Inc(ID);

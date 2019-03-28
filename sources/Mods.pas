@@ -28,7 +28,7 @@ var
 
 implementation
 
-uses System.SysUtils, Utils, WorldMap, Dialogs;
+uses System.SysUtils, Utils, WorldMap, Dialogs, Mobs;
 
 { TMods }
 
@@ -85,6 +85,7 @@ begin
   FSL.LoadFromFile(GetPath('', 'mod.cfg'), TEncoding.UTF8);
   FN := GetCurValue('World', '');
   Map.LoadFromFile(FN);
+  Mob.InitFromCurMap;
 end;
 
 initialization

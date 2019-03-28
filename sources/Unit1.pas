@@ -1,4 +1,4 @@
-unit Unit1;
+п»їunit Unit1;
 
 interface
 
@@ -16,12 +16,6 @@ type
   private
     { Private declarations }
     Surface: TBitmap;
-    // Player
-    procedure OnLevel;
-    procedure OnAddExp(Value: Integer);
-    procedure OnModHP(Value: Integer);
-    procedure OnDead;
-    procedure AddToLog(const M: string);
   public
     { Public declarations }
   end;
@@ -31,7 +25,7 @@ var
 
 implementation
 
-uses Math, WorldMap, Utils, Unit2, Test.Player, Unit3, Mods;
+uses Math, WorldMap, Utils, Unit2, Test.Player, Unit3, Mods, Mobs;
 
 {$R *.dfm}
 
@@ -43,7 +37,7 @@ begin
   begin
     Caption := Format('%s (%d)', [Map.GetCurrentMap.Name, Map.GetCurrentMap.Level]);
     W := Map.GetCurrentMap.TileSize * Map.GetCurrentMap.Width;
-    H := Map.GetCurrentMap.TileSize * Map.GetCurrentMap.Height;
+    H := Map.GetCurrentMap.TileSize * (Map.GetCurrentMap.Height + 1);
     ClientWidth := Min(W, Screen.Width);
     ClientHeight := Min(H, Screen.Height);
     Surface.Width := ClientWidth;
@@ -53,78 +47,59 @@ begin
   end;
 end;
 
-procedure TForm1.AddToLog(const M: string);
-begin
-  Msg := Trim(Msg + ' ' + M);
-end;
-
-function LevExp(const Level: Integer): Integer;
-var
-  I: Integer;
-begin
-  Result := 0;
-  for I := 1 to Level do
-    Result := Result + (I * 50);
-end;
-
 procedure TForm1.FormCreate(Sender: TObject);
 begin
   Map := TWorldMap.Create(Self);
-  // GMods.SetCurrent('elvion');
-  GMods.SetCurrent('twilight_forest');
-  //
+  GMods.SetCurrent('twilight_forest'); // GMods.SetCurrent('elvion');
   Surface := TBitmap.Create;
-  // Player
-  Player := TPlayer.Create;
-  Player.OnLevel := OnLevel;
-  Player.OnModHP := OnModHP;
-  Player.OnBeforeAddExp := OnAddExp;
-  Player.OnMinHP := OnDead;
-  Player.OnLevel;
-  Player.SetLocation(GMods.PlayerX, GMods.PlayerY);
-  //
   RefreshMap;
 end;
 
 procedure TForm1.FormDestroy(Sender: TObject);
 begin
-  FreeAndNil(Player);
   FreeAndNil(Surface);
   FreeAndNil(Map);
 end;
 
 procedure Move(X, Y: Integer);
 var
-  TX, TY: Integer;
-  TileType, ObjType, ItemType, MonType: string;
-begin
-  TX := Player.X + X;
-  TY := Player.Y + Y;
-  //
-  if (TX < 0) and Map.Go(drMapLeft) then
+  TX, TY, I: Integer;
+  TileType, ObjType, ItemType: string;
+
+  procedure DelMob();
   begin
+    Mob.Del(I);
+    Map.GetCurrentMap.FMap[lrMonsters][TX][TY] := -1;
+  end;
+
+begin
+  { TX := Player.X + X;
+    TY := Player.Y + Y;
+    //
+    if (TX < 0) and Map.Go(drMapLeft) then
+    begin
     Form3.MsgLog.Clear;
     RefreshMap;
     Player.SetLocation(Map.GetCurrentMap.Width - 1, Player.Y);
-  end;
-  if (TX > Map.GetCurrentMap.Width - 1) and Map.Go(drMapRight) then
-  begin
+    end;
+    if (TX > Map.GetCurrentMap.Width - 1) and Map.Go(drMapRight) then
+    begin
     Form3.MsgLog.Clear;
     RefreshMap;
     Player.SetLocation(0, Player.Y);
-  end;
-  if (TY < 0) and Map.Go(drMapUp) then
-  begin
+    end;
+    if (TY < 0) and Map.Go(drMapUp) then
+    begin
     Form3.MsgLog.Clear;
     RefreshMap;
     Player.SetLocation(Player.X, Map.GetCurrentMap.Height - 1);
-  end;
-  if (TY > Map.GetCurrentMap.Height - 1) and Map.Go(drMapDown) then
-  begin
+    end;
+    if (TY > Map.GetCurrentMap.Height - 1) and Map.Go(drMapDown) then
+    begin
     Form3.MsgLog.Clear;
     RefreshMap;
     Player.SetLocation(Player.X, 0);
-  end;
+    end; }
   //
   if (TX < 0) or (TX > Map.GetCurrentMap.Width - 1) then
     Exit;
@@ -134,7 +109,6 @@ begin
   TileType := Map.GetCurrentMap.GetTileType(lrTiles, TX, TY);
   ObjType := Map.GetCurrentMap.GetTileType(lrObjects, TX, TY);
   ItemType := Map.GetCurrentMap.GetTileType(lrItems, TX, TY);
-  MonType := Map.GetCurrentMap.GetTileType(lrMonsters, TX, TY);
 
   if not Map.GetCurrentMap.TiledObject[Map.GetCurrentMap.FMap[lrTiles][TX][TY]].Passable then
     Exit;
@@ -153,30 +127,45 @@ begin
   begin
     Map.GetCurrentMap.FMap[lrItems][TX][TY] := -1;
   end;
-  if (MonType <> '') then
+
+  // Mobs
+  I := Mob.IndexOf(TX, TY);
+  if I >= 0 then
   begin
-    Map.GetCurrentMap.FMap[lrMonsters][TX][TY] := -1;
-    Form1.AddToLog('Ты победил!');
-    Player.AddExp(10);
+    if Mob.Get(I).Life > 0 then
+    begin
+      Mob.ModLife(I, -3);
+      if Mob.Get(I).Life = 0 then
+        DelMob()
+      else
+      begin
+        // if Math.RandomRange(0, 3) = 0 then
+        // Player.ModHP(-1);
+        Exit;
+      end
+    end
+    else
+      DelMob();
   end;
-  Player.SetLocation(TX, TY);
+  // Player.SetLocation(TX, TY);
+  //
+  // if Math.RandomRange(0, 9) = 0 then
+  // Player.ModHP(1);
 end;
 
 procedure Use;
-var
-  ObjType: string;
-begin
-  ObjType := Map.GetCurrentMap.GetTileType(lrObjects, Player.X, Player.Y);
-  if (ObjType = 'up_stairs') and Map.Go(drMapTop) then
-  begin
+begin {
+    ObjType := Map.GetCurrentMap.GetTileType(lrObjects, Player.X, Player.Y);
+    if (ObjType = 'up_stairs') and Map.Go(drMapTop) then
+    begin
     Form3.MsgLog.Clear;
     RefreshMap;
-  end;
-  if (ObjType = 'down_stairs') and Map.Go(drMapBottom) then
-  begin
+    end;
+    if (ObjType = 'down_stairs') and Map.Go(drMapBottom) then
+    begin
     Form3.MsgLog.Clear;
     RefreshMap;
-  end;
+    end; }
 end;
 
 procedure TForm1.FormKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
@@ -185,13 +174,21 @@ begin
     Ord('I'):
       ;
     37:
-      Move(-1, 0);
+      begin
+        Mob.Move(-1, 0);
+      end;
     39:
-      Move(1, 0);
+      begin
+        Mob.Move(1, 0);
+      end;
     38:
-      Move(0, -1);
+      begin
+        Mob.Move(0, -1);
+      end;
     40:
-      Move(0, 1);
+      begin
+        Mob.Move(0, 1);
+      end;
     13, 32:
       Use;
     27:
@@ -202,48 +199,30 @@ end;
 
 procedure TForm1.FormPaint(Sender: TObject);
 var
-  X, Y: Integer;
+  I, X, Y: Integer;
   L: TTiledMap.TLayerEnum;
+  M: TMobInfo;
 begin
   for Y := 0 to Map.GetCurrentMap.Height - 1 do
     for X := 0 to Map.GetCurrentMap.Width - 1 do
     begin
-      for L := Low(TTiledMap.TLayerEnum) to High(TTiledMap.TLayerEnum) do
+      for L := Low(TTiledMap.TLayerEnum) to TTiledMap.TLayerEnum.lrItems do
         if (Map.GetCurrentMap.FMap[L][X][Y] >= 0) then
           Surface.Canvas.Draw(X * Map.GetCurrentMap.TileSize, Y * Map.GetCurrentMap.TileSize,
             Map.GetCurrentMap.TiledObject[Map.GetCurrentMap.FMap[L][X][Y]].Image);
     end;
-  Player.Render(Surface);
-  Canvas.Draw(0, 0, Surface);
-  Form2.Render;
-  Form3.Render;
-end;
-
-procedure TForm1.OnAddExp(Value: Integer);
-begin
-  Form1.AddToLog(Format('Опыт +%d.', [Value]));
-end;
-
-procedure TForm1.OnDead;
-begin
-
-end;
-
-procedure TForm1.OnLevel;
-begin
-  Player.Exp := Player.Exp - Player.MaxExp;
-  Player.MaxExp := LevExp(Player.Level);
-  if Player.Level > 1 then
+  // Mobs
+  for I := 0 to Mob.Count - 1 do
   begin
-    Player.MaxHP := Player.MaxHP + 2;
-    Player.MaxMP := Player.MaxMP + 5;
-    Form1.AddToLog('Новый уровень!');
+    M := Mob.Get(I);
+    Mob.MobLB.Assign(Mob.Lifebar);
+    Mob.MobLB.Width := Mob.BarWidth(M.Life, M.MaxLife, 30);
+    X := M.X * Map.GetCurrentMap.TileSize;
+    Y := M.Y * Map.GetCurrentMap.TileSize;
+    Surface.Canvas.Draw(X + 1, Y, Mob.MobLB);
+    Surface.Canvas.Draw(X, Y, Map.GetCurrentMap.TiledObject[M.Id].Image);
   end;
-end;
-
-procedure TForm1.OnModHP(Value: Integer);
-begin
-
+  Canvas.Draw(0, 0, Surface);
 end;
 
 end.
