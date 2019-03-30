@@ -68,33 +68,7 @@ var
   TileType, ObjType, ItemType: string;
 
 begin
-  { TX := Player.X + X;
-    TY := Player.Y + Y;
-    //
-    if (TX < 0) and Map.Go(drMapLeft) then
-    begin
-    Form3.MsgLog.Clear;
-    RefreshMap;
-    Player.SetLocation(Map.GetCurrentMap.Width - 1, Player.Y);
-    end;
-    if (TX > Map.GetCurrentMap.Width - 1) and Map.Go(drMapRight) then
-    begin
-    Form3.MsgLog.Clear;
-    RefreshMap;
-    Player.SetLocation(0, Player.Y);
-    end;
-    if (TY < 0) and Map.Go(drMapUp) then
-    begin
-    Form3.MsgLog.Clear;
-    RefreshMap;
-    Player.SetLocation(Player.X, Map.GetCurrentMap.Height - 1);
-    end;
-    if (TY > Map.GetCurrentMap.Height - 1) and Map.Go(drMapDown) then
-    begin
-    Form3.MsgLog.Clear;
-    RefreshMap;
-    Player.SetLocation(Player.X, 0);
-    end; }
+
   //
   if (TX < 0) or (TX > Map.GetCurrentMap.Width - 1) then
     Exit;
@@ -129,18 +103,12 @@ var
   ObjType: string;
   M: TMobInfo;
 begin
+  if Map.GetCurrentMapMobs.PlayerID = -1 then
+    Exit;
   M := Map.GetCurrentMapMobs.Get(Map.GetCurrentMapMobs.PlayerID);
   ObjType := Map.GetCurrentMap.GetTileType(lrObjects, M.X, M.Y);
-  if (ObjType = 'up_stairs') and Map.Go(drMapTop) then
-  begin
-    // Form3.MsgLog.Clear;
-    RefreshMap;
-  end;
-  if (ObjType = 'down_stairs') and Map.Go(drMapBottom) then
-  begin
-    // Form3.MsgLog.Clear;
-    RefreshMap;
-  end;
+  if (ObjType = 'up_stairs') and Map.Go(drMapTop) then;
+  if (ObjType = 'down_stairs') and Map.Go(drMapBottom) then;
 end;
 
 procedure TForm1.FormKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
@@ -174,9 +142,8 @@ end;
 
 procedure TForm1.FormPaint(Sender: TObject);
 var
-  I, X, Y: Integer;
+  X, Y: Integer;
   L: TTiledMap.TLayerEnum;
-  M: TMobInfo;
 begin
   for Y := 0 to Map.GetCurrentMap.Height - 1 do
     for X := 0 to Map.GetCurrentMap.Width - 1 do
@@ -186,17 +153,7 @@ begin
           Surface.Canvas.Draw(X * Map.GetCurrentMap.TileSize, Y * Map.GetCurrentMap.TileSize,
             Map.GetCurrentMap.TiledObject[Map.GetCurrentMap.FMap[L][X][Y]].Image);
     end;
-  // Mobs
-  for I := 0 to Map.GetCurrentMapMobs.Count - 1 do
-  begin
-    M := Map.GetCurrentMapMobs.Get(I);
-    Map.GetCurrentMapMobs.MobLB.Assign(Map.GetCurrentMapMobs.Lifebar);
-    Map.GetCurrentMapMobs.MobLB.Width := Map.GetCurrentMapMobs.BarWidth(M.Life, M.MaxLife, 30);
-    X := M.X * Map.GetCurrentMap.TileSize;
-    Y := M.Y * Map.GetCurrentMap.TileSize;
-    Surface.Canvas.Draw(X + 1, Y, Map.GetCurrentMapMobs.MobLB);
-    Surface.Canvas.Draw(X, Y, Map.GetCurrentMap.TiledObject[M.Id].Image);
-  end;
+  Map.GetCurrentMapMobs.Render(Surface.Canvas);
   Canvas.Draw(0, 0, Surface);
 end;
 

@@ -47,6 +47,7 @@ type
     procedure MoveToPosition(const I, DX, DY: Integer);
     procedure SetPosition(const I, X, Y: Integer);
     function GetDist(FromX, FromY, ToX, ToY: Single): Word;
+    procedure Render(Canvas: TCanvas);
   end;
 
 implementation
@@ -239,6 +240,9 @@ begin
         Plr.Y, @IsTile, NX, NY) then
         Continue;
       MoveToPosition(I, NX, NY);
+    end
+    else
+    begin
     end;
   end;
 end;
@@ -262,6 +266,23 @@ begin
   Move(I, NX, NY);
 end;
 
+procedure TMobs.Render(Canvas: TCanvas);
+var
+  I, X, Y: Integer;
+  M: TMobInfo;
+begin
+  for I := 0 to Map.GetCurrentMapMobs.Count - 1 do
+  begin
+    M := Map.GetCurrentMapMobs.Get(I);
+    Map.GetCurrentMapMobs.MobLB.Assign(Map.GetCurrentMapMobs.Lifebar);
+    Map.GetCurrentMapMobs.MobLB.Width := Map.GetCurrentMapMobs.BarWidth(M.Life, M.MaxLife, 30);
+    X := M.X * Map.GetCurrentMap.TileSize;
+    Y := M.Y * Map.GetCurrentMap.TileSize;
+    Canvas.Draw(X + 1, Y, Map.GetCurrentMapMobs.MobLB);
+    Canvas.Draw(X, Y, Map.GetCurrentMap.TiledObject[M.Id].Image);
+  end;
+end;
+
 procedure TMobs.Move(const AtkId, DX, DY: Integer);
 var
   NX, NY, DefId, I, Dam: Integer;
@@ -274,6 +295,27 @@ begin
     Exit;
   NX := Atk.X + DX;
   NY := Atk.Y + DY;
+
+  if (NX < 0) and Map.Go(drMapLeft) then
+  begin
+    Map.GetCurrentMapMobs.SetPosition(Map.GetCurrentMapMobs.PlayerID, Map.GetCurrentMap.Width - 1, NY);
+    Exit;
+  end;
+  if (NX > Map.GetCurrentMap.Width - 1) and Map.Go(drMapRight) then
+  begin
+    Map.GetCurrentMapMobs.SetPosition(Map.GetCurrentMapMobs.PlayerID, 0, NY);
+    Exit;
+  end;
+  if (NY < 0) and Map.Go(drMapUp) then
+  begin
+    Map.GetCurrentMapMobs.SetPosition(Map.GetCurrentMapMobs.PlayerID, NX, Map.GetCurrentMap.Height - 1);
+    Exit;
+  end;
+  if (NY > Map.GetCurrentMap.Height - 1) and Map.Go(drMapDown) then
+  begin
+    Map.GetCurrentMapMobs.SetPosition(Map.GetCurrentMapMobs.PlayerID, NX, 0);
+    Exit;
+  end;
 
   if (NX < 0) or (NX > Map.GetCurrentMap.Width - 1) then
     Exit;

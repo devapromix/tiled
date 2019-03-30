@@ -60,6 +60,13 @@
  </tile>
  <tile id="12" type="witch">
   <image width="32" height="32" source="witch.png"/>
+  <properties>
+    <property name="exp" type="int" value="4"/>
+    <property name="life" type="int" value="8"/>
+    <property name="radius" type="int" value="7"/>
+    <property name="level" type="int" value="1"/>
+    <property name="name" value="Witch"/>
+ </properties>
  </tile>
  <tile id="13" type="spider">
   <image width="32" height="32" source="spider.png"/>
