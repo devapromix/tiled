@@ -322,6 +322,8 @@ begin
   if (NY < 0) or (NY > Map.GetCurrentMap.Height - 1) then
     Exit;
 
+
+
   DefId := Self.IndexOf(NX, NY);
   if DefId >= 0 then
   begin

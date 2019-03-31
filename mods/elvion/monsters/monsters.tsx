@@ -23,6 +23,13 @@
  </tile>
  <tile id="2" type="titan">
   <image width="32" height="32" source="titan.png"/>
+  <properties>
+    <property name="exp" type="int" value="7"/>
+    <property name="life" type="int" value="20"/>
+    <property name="radius" type="int" value="5"/>
+    <property name="level" type="int" value="1"/>
+    <property name="name" value="Rat"/>
+ </properties>
  </tile>
  <tile id="3" type="raven">
   <image width="32" height="32" source="raven.png"/>

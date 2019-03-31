@@ -68,8 +68,6 @@ var
   TileType, ObjType, ItemType: string;
 
 begin
-
-  //
   if (TX < 0) or (TX > Map.GetCurrentMap.Width - 1) then
     Exit;
   if (TY < 0) or (TY > Map.GetCurrentMap.Height - 1) then
