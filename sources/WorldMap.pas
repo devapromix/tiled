@@ -2,7 +2,7 @@ unit WorldMap;
 
 interface
 
-uses System.Classes, TiledMap, Mobs;
+uses System.Classes, Graphics, TiledMap, Mobs;
 
 type
   TWorldMap = class(TObject)
@@ -33,6 +33,7 @@ type
     function GetMapMobs(I: Integer): TMobs;
     function GetCurrentMapMobs: TMobs;
     function Go(Dir: TDir): Boolean;
+    procedure Render(Canvas: TCanvas);
   end;
 
 var
@@ -122,16 +123,16 @@ begin
       Exit;
     with GetCurrentMapMobs do
     begin
-      P := Get(PlayerID);
-      Del(PlayerID);
-      PlayerID := -1;
+      P := Get(PlayerIndex);
+      Del(PlayerIndex);
+      PlayerIndex := -1;
       GetMapMobs(I).Add(P);
       for J := 0 to GetMapMobs(I).Count - 1 do
       begin
         P := GetMapMobs(I).Get(J);
         if P.Force = 1 then
         begin
-          GetMapMobs(I).PlayerID := J;
+          GetMapMobs(I).PlayerIndex := J;
           Break;
         end;
       end;
@@ -171,6 +172,22 @@ begin
   finally
     FreeAndNil(F);
   end;
+end;
+
+procedure TWorldMap.Render(Canvas: TCanvas);
+var
+  Y: Integer;
+  X: Integer;
+  L: TTiledMap.TLayerEnum;
+begin
+  for Y := 0 to Map.GetCurrentMap.Height - 1 do
+    for X := 0 to Map.GetCurrentMap.Width - 1 do
+    begin
+      for L := Low(TTiledMap.TLayerEnum) to TTiledMap.TLayerEnum.lrItems do
+        if (Map.GetCurrentMap.FMap[L][X][Y] >= 0) then
+          Canvas.Draw(X * Map.GetCurrentMap.TileSize, Y * Map.GetCurrentMap.TileSize,
+            Map.GetCurrentMap.TiledObject[Map.GetCurrentMap.FMap[L][X][Y]].Image);
+    end;
 end;
 
 end.

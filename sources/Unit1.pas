@@ -62,49 +62,15 @@ begin
   FreeAndNil(Map);
 end;
 
-procedure Move(X, Y: Integer);
-var
-  TX, TY, I: Integer;
-  TileType, ObjType, ItemType: string;
-
-begin
-  if (TX < 0) or (TX > Map.GetCurrentMap.Width - 1) then
-    Exit;
-  if (TY < 0) or (TY > Map.GetCurrentMap.Height - 1) then
-    Exit;
-
-  TileType := Map.GetCurrentMap.GetTileType(lrTiles, TX, TY);
-  ObjType := Map.GetCurrentMap.GetTileType(lrObjects, TX, TY);
-  ItemType := Map.GetCurrentMap.GetTileType(lrItems, TX, TY);
-
-  if not Map.GetCurrentMap.TiledObject[Map.GetCurrentMap.FMap[lrTiles][TX][TY]].Passable then
-    Exit;
-
-  if (ObjType = 'closed_door') or (ObjType = 'hidden_door') or (ObjType = 'closed_chest') or (ObjType = 'trapped_chest') then
-  begin
-    Inc(Map.GetCurrentMap.FMap[lrObjects][TX][TY]);
-    if (ObjType = 'closed_chest') then
-    begin
-      Map.GetCurrentMap.FMap[lrItems][TX][TY] := RandomRange(Map.GetCurrentMap.Firstgid[lrItems], Map.GetCurrentMap.Firstgid[lrMonsters]) - 1;
-    end;
-    Exit;
-  end;
-
-  if (ItemType <> '') then
-  begin
-    Map.GetCurrentMap.FMap[lrItems][TX][TY] := -1;
-  end;
-end;
-
 procedure Use;
 var
   ObjType: string;
-  M: TMobInfo;
+  Player: TMobInfo;
 begin
-  if Map.GetCurrentMapMobs.PlayerID = -1 then
+  if Map.GetCurrentMapMobs.PlayerIndex = -1 then
     Exit;
-  M := Map.GetCurrentMapMobs.Get(Map.GetCurrentMapMobs.PlayerID);
-  ObjType := Map.GetCurrentMap.GetTileType(lrObjects, M.X, M.Y);
+  Player := Map.GetCurrentMapMobs.Get(Map.GetCurrentMapMobs.PlayerIndex);
+  ObjType := Map.GetCurrentMap.GetTileType(lrObjects, Player.X, Player.Y);
   if (ObjType = 'up_stairs') and Map.Go(drMapTop) then;
   if (ObjType = 'down_stairs') and Map.Go(drMapBottom) then;
 end;
@@ -139,18 +105,8 @@ begin
 end;
 
 procedure TForm1.FormPaint(Sender: TObject);
-var
-  X, Y: Integer;
-  L: TTiledMap.TLayerEnum;
 begin
-  for Y := 0 to Map.GetCurrentMap.Height - 1 do
-    for X := 0 to Map.GetCurrentMap.Width - 1 do
-    begin
-      for L := Low(TTiledMap.TLayerEnum) to TTiledMap.TLayerEnum.lrItems do
-        if (Map.GetCurrentMap.FMap[L][X][Y] >= 0) then
-          Surface.Canvas.Draw(X * Map.GetCurrentMap.TileSize, Y * Map.GetCurrentMap.TileSize,
-            Map.GetCurrentMap.TiledObject[Map.GetCurrentMap.FMap[L][X][Y]].Image);
-    end;
+  Map.Render(Surface.Canvas);
   Map.GetCurrentMapMobs.Render(Surface.Canvas);
   Canvas.Draw(0, 0, Surface);
 end;

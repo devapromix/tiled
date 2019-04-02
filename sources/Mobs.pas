@@ -29,7 +29,7 @@ type
   public
     MobLB: TBitmap;
     Lifebar: TPNGImage;
-    PlayerID: Integer;
+    PlayerIndex: Integer;
     constructor Create;
     destructor Destroy; override;
     procedure Clear;
@@ -60,9 +60,14 @@ const
 
   { TMobs }
 
-function IsTile(X, Y: Integer): Boolean; stdcall;
+function IsTilePassable(X, Y: Integer): Boolean; stdcall;
 begin
-  Result := True;
+  with Map.GetCurrentMap do
+  begin
+    Result := TiledObject[FMap[lrTiles][X][Y]].Passable;
+    if (FMap[lrObjects][X][Y] >= 0) then
+      Result := Result and TiledObject[FMap[lrObjects][X][Y]].Passable;
+  end;
 end;
 
 function TMobs.BarWidth(CX, MX, GS: Integer): Integer;
@@ -116,7 +121,7 @@ end;
 
 constructor TMobs.Create;
 begin
-  PlayerID := -1;
+  PlayerIndex := -1;
   MobLB := TBitmap.Create;
   Lifebar := TPNGImage.Create;
   Lifebar.LoadFromFile(GMods.GetPath('images', 'lifebar.png'));
@@ -144,12 +149,14 @@ var
   I: Integer;
   S: string;
 begin
-  S := '';
-  for I := 0 to Self.Count - 1 do
-  begin
+  {
+    S := '';
+    for I := 0 to Self.Count - 1 do
+    begin
     S := S + Format('%s,%s,%s,%s,%s', [FForce[I], FCoord[I], FID[I], FName[I], FLife[I]]) + #13#10;
-  end;
-  ShowMessage(S);
+    end;
+    ShowMessage(S);
+  }
   FreeAndNil(MobLB);
   FreeAndNil(Lifebar);
   FreeAndNil(FForce);
@@ -199,7 +206,7 @@ begin
         begin
           if LowerCase(Name) = 'human' then
           begin
-            PlayerID := J;
+            PlayerIndex := J;
             F := 1;
           end;
           Add(F, X, Y, I, Name, Life, Life, Radius);
@@ -225,19 +232,19 @@ var
   I, NX, NY: Integer;
   Plr, Enm: TMobInfo;
 begin
-  Move(PlayerID, DX, DY);
+  Move(PlayerIndex, DX, DY);
   for I := Count - 1 downto 0 do
   begin
-    if PlayerID = -1 then
+    if PlayerIndex = -1 then
       Exit;
     if Get(I).Force = 0 then
     begin
-      Plr := Get(PlayerID);
+      Plr := Get(PlayerIndex);
       Enm := Get(I);
       NX := 0;
       NY := 0;
       if (GetDist(Enm.X, Enm.Y, Plr.X, Plr.Y) > Enm.Radius) or not IsPathFind(Map.GetCurrentMap.Width, Map.GetCurrentMap.Height, Enm.X, Enm.Y, Plr.X,
-        Plr.Y, @IsTile, NX, NY) then
+        Plr.Y, @IsTilePassable, NX, NY) then
         Continue;
       MoveToPosition(I, NX, NY);
     end
@@ -287,8 +294,9 @@ procedure TMobs.Move(const AtkId, DX, DY: Integer);
 var
   NX, NY, DefId, I, Dam: Integer;
   Atk, Def: TMobInfo;
+  ObjType, ItemType: string;
 begin
-  if PlayerID = -1 then
+  if PlayerIndex = -1 then
     Exit;
   Atk := Get(AtkId);
   if Atk.Life <= 0 then
@@ -298,22 +306,22 @@ begin
 
   if (NX < 0) and Map.Go(drMapLeft) then
   begin
-    Map.GetCurrentMapMobs.SetPosition(Map.GetCurrentMapMobs.PlayerID, Map.GetCurrentMap.Width - 1, NY);
+    Map.GetCurrentMapMobs.SetPosition(Map.GetCurrentMapMobs.PlayerIndex, Map.GetCurrentMap.Width - 1, NY);
     Exit;
   end;
   if (NX > Map.GetCurrentMap.Width - 1) and Map.Go(drMapRight) then
   begin
-    Map.GetCurrentMapMobs.SetPosition(Map.GetCurrentMapMobs.PlayerID, 0, NY);
+    Map.GetCurrentMapMobs.SetPosition(Map.GetCurrentMapMobs.PlayerIndex, 0, NY);
     Exit;
   end;
   if (NY < 0) and Map.Go(drMapUp) then
   begin
-    Map.GetCurrentMapMobs.SetPosition(Map.GetCurrentMapMobs.PlayerID, NX, Map.GetCurrentMap.Height - 1);
+    Map.GetCurrentMapMobs.SetPosition(Map.GetCurrentMapMobs.PlayerIndex, NX, Map.GetCurrentMap.Height - 1);
     Exit;
   end;
   if (NY > Map.GetCurrentMap.Height - 1) and Map.Go(drMapDown) then
   begin
-    Map.GetCurrentMapMobs.SetPosition(Map.GetCurrentMapMobs.PlayerID, NX, 0);
+    Map.GetCurrentMapMobs.SetPosition(Map.GetCurrentMapMobs.PlayerIndex, NX, 0);
     Exit;
   end;
 
@@ -322,7 +330,27 @@ begin
   if (NY < 0) or (NY > Map.GetCurrentMap.Height - 1) then
     Exit;
 
+  ObjType := Map.GetCurrentMap.GetTileType(lrObjects, NX, NY);
+  ItemType := Map.GetCurrentMap.GetTileType(lrItems, NX, NY);
 
+  if not IsTilePassable(NX, NY) then
+    Exit;
+
+  if (ObjType = 'closed_door') or (ObjType = 'hidden_door') or (ObjType = 'closed_chest') or (ObjType = 'trapped_chest') then
+  begin
+    Inc(Map.GetCurrentMap.FMap[lrObjects][NX][NY]);
+    if (ObjType = 'closed_chest') then
+    begin
+      Map.GetCurrentMap.FMap[lrItems][NX][NY] := RandomRange(Map.GetCurrentMap.Firstgid[lrItems], Map.GetCurrentMap.Firstgid[lrMonsters]) - 1;
+    end;
+    Exit;
+  end;
+
+  if (ItemType <> '') then
+  begin
+    Map.GetCurrentMap.FMap[lrItems][NX][NY] := -1;
+    Exit;
+  end;
 
   DefId := Self.IndexOf(NX, NY);
   if DefId >= 0 then
@@ -345,11 +373,11 @@ begin
       begin
         Del(DefId);
         Map.GetCurrentMap.FMap[lrMonsters][NX][NY] := -1;
-        PlayerID := -1;
+        PlayerIndex := -1;
         for I := 0 to Count - 1 do
           if FForce[I] = '1' then
           begin
-            PlayerID := I;
+            PlayerIndex := I;
             Break;
           end;
       end;

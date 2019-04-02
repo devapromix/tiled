@@ -134,28 +134,37 @@ var
           for J := 0 to PropCount - 1 do
           begin
             NodeProp := NodeProps.ChildNodes[J];
-            if Section = 'tiles' then
+            if (Section = 'tiles') then
             begin
               Name := NodeProp.Attributes['name'];
               Value := NodeProp.Attributes['value'];
               if (Name = 'passable') then
-                TiledObject[ID].Passable := StrToBool(Value);
+                TiledObject[ID].Passable := StrToBoolDef(Value, False);
               if (Name = 'transparent') then
-                TiledObject[ID].Transparent := StrToBool(Value);
+                TiledObject[ID].Transparent := StrToBoolDef(Value, False);
+            end;
+            if Section = 'objects' then
+            begin
+              Name := NodeProp.Attributes['name'];
+              Value := NodeProp.Attributes['value'];
+              if (Name = 'passable') then
+                TiledObject[ID].Passable := StrToBoolDef(Value, False);
+              if (Name = 'transparent') then
+                TiledObject[ID].Transparent := StrToBoolDef(Value, False);
             end;
             if Section = 'monsters' then
             begin
               Name := NodeProp.Attributes['name'];
               Value := NodeProp.Attributes['value'];
-              //ShowMessage(Value);
+              // ShowMessage(Value);
               if (Name = 'name') then
                 TiledObject[ID].Name := Trim(Value);
               if (Name = 'level') then
-                TiledObject[ID].Level := StrToInt(Value);
+                TiledObject[ID].Level := StrToIntDef(Value, 1);
               if (Name = 'life') then
-                TiledObject[ID].Life := StrToInt(Value);
+                TiledObject[ID].Life := StrToIntDef(Value, 5);
               if (Name = 'radius') then
-                TiledObject[ID].Radius := StrToInt(Value);
+                TiledObject[ID].Radius := StrToIntDef(Value, 1);
             end;
           end;
           Inc(ID);
@@ -178,7 +187,7 @@ var
       Name := Trim(N.Attributes['name']);
       Value := Trim(N.Attributes['value']);
       if Name = 'Name' then
-        FName := Value;
+        FName := Trim(Value);
       if Name = 'Level' then
         FLevel := StrToIntDef(Value, 0);
     end;
