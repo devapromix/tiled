@@ -4,7 +4,7 @@ object Form1: TForm1
   BorderIcons = [biSystemMenu, biMinimize]
   BorderStyle = bsSingle
   Caption = 'Form1'
-  ClientHeight = 128
+  ClientHeight = 142
   ClientWidth = 248
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET

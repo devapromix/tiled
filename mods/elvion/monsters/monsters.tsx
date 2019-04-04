@@ -1,9 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <tileset name="monsters" tilewidth="32" tileheight="32" tilecount="15" columns="0">
  <grid orientation="orthogonal" width="1" height="1"/>
- <tile id="0" type="human">
+ <tile id="0" type="player">
   <image width="32" height="32" source="human.png"/>
   <properties>
+    <property name="min_damage" type="int" value="1"/>
+    <property name="max_damage" type="int" value="2"/>
     <property name="exp" type="int" value="0"/>
     <property name="life" type="int" value="100"/>
     <property name="radius" type="int" value="5"/>
@@ -14,6 +16,8 @@
  <tile id="1" type="rat">
   <image width="32" height="32" source="rat.png"/>
   <properties>
+    <property name="min_damage" type="int" value="1"/>
+    <property name="max_damage" type="int" value="2"/>
     <property name="exp" type="int" value="3"/>
     <property name="life" type="int" value="10"/>
     <property name="radius" type="int" value="5"/>
@@ -24,6 +28,8 @@
  <tile id="2" type="titan">
   <image width="32" height="32" source="titan.png"/>
   <properties>
+    <property name="min_damage" type="int" value="1"/>
+    <property name="max_damage" type="int" value="2"/>
     <property name="exp" type="int" value="7"/>
     <property name="life" type="int" value="20"/>
     <property name="radius" type="int" value="5"/>
@@ -52,6 +58,8 @@
  <tile id="9" type="darkeye">
   <image width="32" height="32" source="darkeye.png"/>
   <properties>
+    <property name="min_damage" type="int" value="1"/>
+    <property name="max_damage" type="int" value="2"/>
     <property name="exp" type="int" value="5"/>
     <property name="life" type="int" value="15"/>
     <property name="radius" type="int" value="5"/>
@@ -68,6 +76,8 @@
  <tile id="12" type="witch">
   <image width="32" height="32" source="witch.png"/>
   <properties>
+    <property name="min_damage" type="int" value="1"/>
+    <property name="max_damage" type="int" value="2"/>
     <property name="exp" type="int" value="4"/>
     <property name="life" type="int" value="8"/>
     <property name="radius" type="int" value="7"/>
@@ -78,6 +88,8 @@
  <tile id="13" type="spider">
   <image width="32" height="32" source="spider.png"/>
   <properties>
+    <property name="min_damage" type="int" value="1"/>
+    <property name="max_damage" type="int" value="2"/>
     <property name="exp" type="int" value="4"/>
     <property name="life" type="int" value="12"/>
     <property name="radius" type="int" value="3"/>
@@ -87,5 +99,14 @@
  </tile>
  <tile id="14" type="undead">
   <image width="32" height="32" source="undead.png"/>
+  <properties>
+    <property name="min_damage" type="int" value="5"/>
+    <property name="max_damage" type="int" value="7"/>
+    <property name="exp" type="int" value="4"/>
+    <property name="life" type="int" value="20"/>
+    <property name="radius" type="int" value="3"/>
+    <property name="level" type="int" value="1"/>
+    <property name="name" value="Undead"/>
+ </properties>
  </tile>
 </tileset>

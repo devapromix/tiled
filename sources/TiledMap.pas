@@ -26,6 +26,8 @@ type
       TileType: string;
       Level: Integer;
       Life: Integer;
+      MinDam: Integer;
+      MaxDam: Integer;
       Radius: Integer;
       Passable: Boolean;
       Transparent: Boolean;
@@ -49,7 +51,7 @@ type
 
 implementation
 
-uses System.SysUtils, Utils, Xml.XMLDoc, Xml.XMLIntf, System.IOUtils, Dialogs, Mods;
+uses System.SysUtils, Math, Utils, Xml.XMLDoc, Xml.XMLIntf, System.IOUtils, Dialogs, Mods;
 
 { TTiledMap }
 
@@ -165,6 +167,10 @@ var
                 TiledObject[ID].Life := StrToIntDef(Value, 5);
               if (Name = 'radius') then
                 TiledObject[ID].Radius := StrToIntDef(Value, 1);
+              if (Name = 'min_damage') then
+                TiledObject[ID].MinDam := EnsureRange(StrToIntDef(Value, 1), 1, 250);
+              if (Name = 'max_damage') then
+                TiledObject[ID].MaxDam := EnsureRange(StrToIntDef(Value, 2), 2, 255);
             end;
           end;
           Inc(ID);

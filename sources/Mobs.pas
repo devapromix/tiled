@@ -14,6 +14,8 @@ type
     Name: string;
     Life: Integer;
     MaxLife: Integer;
+    MinDam: Integer;
+    MaxDam: Integer;
     Radius: Integer;
   end;
 
@@ -25,6 +27,7 @@ type
     FID: TStringList;
     FName: TStringList;
     FLife: TStringList;
+    FDam: TStringList;
     FRad: TStringList;
   public
     MobLB: TBitmap;
@@ -34,7 +37,7 @@ type
     destructor Destroy; override;
     procedure Clear;
     procedure LoadFromMap(const N: Integer);
-    procedure Add(const Force, X, Y, Id: Integer; N: string; L, MaxL, R: Integer); overload;
+    procedure Add(const Force, X, Y, Id: Integer; N: string; L, MaxL, MinD, MaxD, R: Integer); overload;
     procedure Add(const P: TMobInfo); overload;
     function BarWidth(CX, MX, GS: Integer): Integer;
     function Count: Integer;
@@ -44,6 +47,7 @@ type
     procedure ModLife(const Index, Value: Integer);
     procedure Move(const AtkId, DX, DY: Integer); overload;
     procedure Move(const DX, DY: Integer); overload;
+    procedure Attack(const NX, NY, AtkId, DefId: Integer; Atk, Def: TMobInfo);
     procedure MoveToPosition(const I, DX, DY: Integer);
     procedure SetPosition(const I, X, Y: Integer);
     function GetDist(FromX, FromY, ToX, ToY: Single): Word;
@@ -89,19 +93,48 @@ begin
   Result := I;
 end;
 
-procedure TMobs.Add(const Force, X, Y, Id: Integer; N: string; L, MaxL, R: Integer);
+procedure TMobs.Add(const Force, X, Y, Id: Integer; N: string; L, MaxL, MinD, MaxD, R: Integer);
 begin
   FForce.Append(Force.ToString);
   FCoord.Append(Format(F, [X, Y]));
   FID.Append(Id.ToString);
   FName.Append(N);
   FLife.Append(Format(F, [L, MaxL]));
+  FDam.Append(Format(F, [MinD, MaxD]));
   FRad.Append(R.ToString);
 end;
 
 procedure TMobs.Add(const P: TMobInfo);
 begin
-  Self.Add(P.Force, P.X, P.Y, P.Id, P.Name, P.Life, P.MaxLife, P.Radius);
+  Self.Add(P.Force, P.X, P.Y, P.Id, P.Name, P.Life, P.MaxLife, P.MinDam, P.MaxDam, P.Radius);
+end;
+
+procedure TMobs.Attack(const NX, NY, AtkId, DefId: Integer; Atk, Def: TMobInfo);
+var
+  I, Dam: Integer;
+begin
+  if (Math.RandomRange(0, 3 + 1) >= Math.RandomRange(0, 3 + 1)) then
+  begin
+    Dam := Math.RandomRange(Atk.MinDam, Atk.MaxDam + 1);
+    ModLife(DefId, -Dam);
+  end
+  else
+  begin
+    // Miss
+  end;
+  if Get(DefId).Life = 0 then
+  begin
+    Del(DefId);
+    Map.GetCurrentMap.FMap[lrMonsters][NX][NY] := -1;
+    PlayerIndex := -1;
+    for I := 0 to Count - 1 do
+      if FForce[I] = '1' then
+      begin
+        PlayerIndex := I;
+        Break;
+      end;
+  end;
+
 end;
 
 procedure TMobs.Clear;
@@ -111,6 +144,7 @@ begin
   FID.Clear;
   FName.Clear;
   FLife.Clear;
+  FDam.Clear;
   FRad.Clear;
 end;
 
@@ -130,6 +164,7 @@ begin
   FID := TStringList.Create;
   FName := TStringList.Create;
   FLife := TStringList.Create;
+  FDam := TStringList.Create;
   FRad := TStringList.Create;
 end;
 
@@ -140,6 +175,7 @@ begin
   FID.Delete(I);
   FName.Delete(I);
   FLife.Delete(I);
+  FDam.Delete(I);
   FRad.Delete(I);
   Result := True;
 end;
@@ -164,6 +200,7 @@ begin
   FreeAndNil(FID);
   FreeAndNil(FName);
   FreeAndNil(FLife);
+  FreeAndNil(FDam);
   FreeAndNil(FRad);
   inherited;
 end;
@@ -177,6 +214,8 @@ begin
   Result.Name := FName[I];
   Result.Life := FLife.KeyNames[I].ToInteger;
   Result.MaxLife := FLife.ValueFromIndex[I].ToInteger;
+  Result.MinDam := FDam.KeyNames[I].ToInteger;
+  Result.MaxDam := FDam.ValueFromIndex[I].ToInteger;
   Result.Radius := FRad[I].ToInteger;
 end;
 
@@ -209,7 +248,7 @@ begin
             PlayerIndex := J;
             F := 1;
           end;
-          Add(F, X, Y, I, Name, Life, Life, Radius);
+          Add(F, X, Y, I, Name, Life, Life, MinDam, MaxDam, Radius);
           Inc(J);
         end;
       end;
@@ -358,29 +397,7 @@ begin
     Def := Get(DefId);
     if Atk.Force <> Def.Force then
     begin
-      begin
-        if (Math.RandomRange(0, 3 + 1) >= Math.RandomRange(0, 3 + 1)) then
-        begin
-          Dam := Math.RandomRange(2, 3 + 1);
-          ModLife(DefId, -Dam);
-        end
-        else
-        begin
-          // Miss
-        end;
-      end;
-      if Get(DefId).Life = 0 then
-      begin
-        Del(DefId);
-        Map.GetCurrentMap.FMap[lrMonsters][NX][NY] := -1;
-        PlayerIndex := -1;
-        for I := 0 to Count - 1 do
-          if FForce[I] = '1' then
-          begin
-            PlayerIndex := I;
-            Break;
-          end;
-      end;
+      Self.Attack(NX, NY, AtkId, DefId, Atk, Def);
     end;
     Exit;
   end;
