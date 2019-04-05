@@ -121,6 +121,7 @@
         <DCCReference Include="Mods.pas"/>
         <DCCReference Include="Mobs.pas"/>
         <DCCReference Include="PathFind.pas"/>
+        <DCCReference Include="MsgLog.pas"/>
         <BuildConfiguration Include="Release">
             <Key>Cfg_2</Key>
             <CfgParent>Base</CfgParent>

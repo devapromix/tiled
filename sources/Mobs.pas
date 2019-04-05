@@ -57,7 +57,7 @@ type
 implementation
 
 uses
-  SysUtils, Math, Dialogs, WorldMap, Mods, TiledMap, PathFind;
+  SysUtils, Math, Dialogs, WorldMap, Mods, TiledMap, PathFind, MsgLog;
 
 const
   F = '%d=%d';
@@ -271,6 +271,7 @@ var
   I, NX, NY: Integer;
   Plr, Enm: TMobInfo;
 begin
+  Log.Turn;
   Move(PlayerIndex, DX, DY);
   for I := Count - 1 downto 0 do
   begin
@@ -345,21 +346,25 @@ begin
 
   if (NX < 0) and Map.Go(drMapLeft) then
   begin
+    Log.Add(Map.GetCurrentMap.Name);
     Map.GetCurrentMapMobs.SetPosition(Map.GetCurrentMapMobs.PlayerIndex, Map.GetCurrentMap.Width - 1, NY);
     Exit;
   end;
   if (NX > Map.GetCurrentMap.Width - 1) and Map.Go(drMapRight) then
   begin
+    Log.Add(Map.GetCurrentMap.Name);
     Map.GetCurrentMapMobs.SetPosition(Map.GetCurrentMapMobs.PlayerIndex, 0, NY);
     Exit;
   end;
   if (NY < 0) and Map.Go(drMapUp) then
   begin
+    Log.Add(Map.GetCurrentMap.Name);
     Map.GetCurrentMapMobs.SetPosition(Map.GetCurrentMapMobs.PlayerIndex, NX, Map.GetCurrentMap.Height - 1);
     Exit;
   end;
   if (NY > Map.GetCurrentMap.Height - 1) and Map.Go(drMapDown) then
   begin
+    Log.Add(Map.GetCurrentMap.Name);
     Map.GetCurrentMapMobs.SetPosition(Map.GetCurrentMapMobs.PlayerIndex, NX, 0);
     Exit;
   end;
@@ -387,6 +392,7 @@ begin
 
   if (ItemType <> '') then
   begin
+    Log.Add('Ваша добыча: ' + ItemType);
     Map.GetCurrentMap.FMap[lrItems][NX][NY] := -1;
     Exit;
   end;

@@ -25,7 +25,7 @@ var
 
 implementation
 
-uses Math, WorldMap, Utils, Mods, Mobs;
+uses Math, WorldMap, Utils, Mods, Mobs, MsgLog;
 
 {$R *.dfm}
 
@@ -49,10 +49,15 @@ end;
 
 procedure TForm1.FormCreate(Sender: TObject);
 begin
+
   Map := TWorldMap.Create(Self);
   GMods.SetCurrent('twilight_forest');
   // GMods.SetCurrent('elvion');
   Surface := TBitmap.Create;
+  Surface.Canvas.Brush.Style := bsClear;
+  Surface.Canvas.Font.Name := 'Courier New';
+  Surface.Canvas.Font.Color := clWhite;
+  Surface.Canvas.Font.Size := 10;
   RefreshMap;
 end;
 
@@ -71,8 +76,16 @@ begin
     Exit;
   Player := Map.GetCurrentMapMobs.Get(Map.GetCurrentMapMobs.PlayerIndex);
   ObjType := Map.GetCurrentMap.GetTileType(lrObjects, Player.X, Player.Y);
-  if (ObjType = 'up_stairs') and Map.Go(drMapTop) then;
-  if (ObjType = 'down_stairs') and Map.Go(drMapBottom) then;
+  if (ObjType = 'up_stairs') and Map.Go(drMapTop) then
+  begin
+    Map.GetCurrentMapMobs.Move(0, 0);
+    Log.Add(Map.GetCurrentMap.Name);
+  end;
+  if (ObjType = 'down_stairs') and Map.Go(drMapBottom) then
+  begin
+    Map.GetCurrentMapMobs.Move(0, 0);
+    Log.Add(Map.GetCurrentMap.Name);
+  end;
 end;
 
 procedure TForm1.FormKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
@@ -106,8 +119,11 @@ end;
 
 procedure TForm1.FormPaint(Sender: TObject);
 begin
+  Surface.Canvas.Brush.Color := clBlack;
+  Surface.Canvas.FillRect(Rect(0, 0, Surface.Width, Surface.Height));
   Map.Render(Surface.Canvas);
   Map.GetCurrentMapMobs.Render(Surface.Canvas);
+  Log.Render(Surface.Canvas);
   Canvas.Draw(0, 0, Surface);
 end;
 

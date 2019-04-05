@@ -9,7 +9,8 @@ uses
   Utils in 'Utils.pas',
   Mods in 'Mods.pas',
   Mobs in 'Mobs.pas',
-  PathFind in 'PathFind.pas';
+  PathFind in 'PathFind.pas',
+  MsgLog in 'MsgLog.pas';
 
 {$R *.res}
 
