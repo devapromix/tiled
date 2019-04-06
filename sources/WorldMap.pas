@@ -123,16 +123,16 @@ begin
       Exit;
     with GetCurrentMapMobs do
     begin
-      P := Get(PlayerIndex);
-      Del(PlayerIndex);
-      PlayerIndex := -1;
+      P := Get(Player.Idx);
+      Del(Player.Idx);
+      Player.Idx := -1;
       GetMapMobs(I).Add(P);
       for J := 0 to GetMapMobs(I).Count - 1 do
       begin
         P := GetMapMobs(I).Get(J);
         if P.Force = 1 then
         begin
-          GetMapMobs(I).PlayerIndex := J;
+          GetMapMobs(I).Player.Idx := J;
           Break;
         end;
       end;

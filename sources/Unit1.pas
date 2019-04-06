@@ -72,9 +72,9 @@ var
   ObjType: string;
   Player: TMobInfo;
 begin
-  if Map.GetCurrentMapMobs.PlayerIndex = -1 then
+  if Map.GetCurrentMapMobs.Player.Idx = -1 then
     Exit;
-  Player := Map.GetCurrentMapMobs.Get(Map.GetCurrentMapMobs.PlayerIndex);
+  Player := Map.GetCurrentMapMobs.Get(Map.GetCurrentMapMobs.Player.Idx);
   ObjType := Map.GetCurrentMap.GetTileType(lrObjects, Player.X, Player.Y);
   if (ObjType = 'up_stairs') and Map.Go(drMapTop) then
   begin

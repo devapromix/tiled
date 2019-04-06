@@ -20,6 +20,16 @@ type
   end;
 
 type
+  TPlayer = class(TObject)
+  private
+    FIdx: Integer;
+  public
+    constructor Create;
+    destructor Destroy; override;
+    property Idx: Integer read FIdx write FIdx;
+  end;
+
+type
   TMobs = class(TObject)
   private
     FForce: TStringList;
@@ -29,10 +39,10 @@ type
     FLife: TStringList;
     FDam: TStringList;
     FRad: TStringList;
+    FPlayer: TPlayer;
   public
     MobLB: TBitmap;
     Lifebar: TPNGImage;
-    PlayerIndex: Integer;
     constructor Create;
     destructor Destroy; override;
     procedure Clear;
@@ -52,6 +62,7 @@ type
     procedure SetPosition(const I, X, Y: Integer);
     function GetDist(FromX, FromY, ToX, ToY: Single): Word;
     procedure Render(Canvas: TCanvas);
+    property Player: TPlayer read FPlayer write FPlayer;
   end;
 
 implementation
@@ -126,11 +137,11 @@ begin
   begin
     Del(DefId);
     Map.GetCurrentMap.FMap[lrMonsters][NX][NY] := -1;
-    PlayerIndex := -1;
+    Player.Idx := -1;
     for I := 0 to Count - 1 do
       if FForce[I] = '1' then
       begin
-        PlayerIndex := I;
+        Player.Idx := I;
         Break;
       end;
   end;
@@ -155,7 +166,7 @@ end;
 
 constructor TMobs.Create;
 begin
-  PlayerIndex := -1;
+  Player:= TPlayer.Create;
   MobLB := TBitmap.Create;
   Lifebar := TPNGImage.Create;
   Lifebar.LoadFromFile(GMods.GetPath('images', 'lifebar.png'));
@@ -181,9 +192,9 @@ begin
 end;
 
 destructor TMobs.Destroy;
-var
-  I: Integer;
-  S: string;
+//var
+//  I: Integer;
+//  S: string;
 begin
   {
     S := '';
@@ -193,6 +204,7 @@ begin
     end;
     ShowMessage(S);
   }
+  FreeAndNil(FPlayer);
   FreeAndNil(MobLB);
   FreeAndNil(Lifebar);
   FreeAndNil(FForce);
@@ -245,7 +257,7 @@ begin
         begin
           if LowerCase(Name) = 'human' then
           begin
-            PlayerIndex := J;
+            Player.Idx := J;
             F := 1;
           end;
           Add(F, X, Y, I, Name, Life, Life, MinDam, MaxDam, Radius);
@@ -272,14 +284,14 @@ var
   Plr, Enm: TMobInfo;
 begin
   Log.Turn;
-  Move(PlayerIndex, DX, DY);
+  Move(Player.Idx, DX, DY);
   for I := Count - 1 downto 0 do
   begin
-    if PlayerIndex = -1 then
+    if Player.Idx = -1 then
       Exit;
     if Get(I).Force = 0 then
     begin
-      Plr := Get(PlayerIndex);
+      Plr := Get(Player.Idx);
       Enm := Get(I);
       NX := 0;
       NY := 0;
@@ -336,7 +348,7 @@ var
   Atk, Def: TMobInfo;
   ObjType, ItemType: string;
 begin
-  if PlayerIndex = -1 then
+  if Player.Idx = -1 then
     Exit;
   Atk := Get(AtkId);
   if Atk.Life <= 0 then
@@ -347,25 +359,25 @@ begin
   if (NX < 0) and Map.Go(drMapLeft) then
   begin
     Log.Add(Map.GetCurrentMap.Name);
-    Map.GetCurrentMapMobs.SetPosition(Map.GetCurrentMapMobs.PlayerIndex, Map.GetCurrentMap.Width - 1, NY);
+    Map.GetCurrentMapMobs.SetPosition(Map.GetCurrentMapMobs.Player.Idx, Map.GetCurrentMap.Width - 1, NY);
     Exit;
   end;
   if (NX > Map.GetCurrentMap.Width - 1) and Map.Go(drMapRight) then
   begin
     Log.Add(Map.GetCurrentMap.Name);
-    Map.GetCurrentMapMobs.SetPosition(Map.GetCurrentMapMobs.PlayerIndex, 0, NY);
+    Map.GetCurrentMapMobs.SetPosition(Map.GetCurrentMapMobs.Player.Idx, 0, NY);
     Exit;
   end;
   if (NY < 0) and Map.Go(drMapUp) then
   begin
     Log.Add(Map.GetCurrentMap.Name);
-    Map.GetCurrentMapMobs.SetPosition(Map.GetCurrentMapMobs.PlayerIndex, NX, Map.GetCurrentMap.Height - 1);
+    Map.GetCurrentMapMobs.SetPosition(Map.GetCurrentMapMobs.Player.Idx, NX, Map.GetCurrentMap.Height - 1);
     Exit;
   end;
   if (NY > Map.GetCurrentMap.Height - 1) and Map.Go(drMapDown) then
   begin
     Log.Add(Map.GetCurrentMap.Name);
-    Map.GetCurrentMapMobs.SetPosition(Map.GetCurrentMapMobs.PlayerIndex, NX, 0);
+    Map.GetCurrentMapMobs.SetPosition(Map.GetCurrentMapMobs.Player.Idx, NX, 0);
     Exit;
   end;
 
@@ -413,6 +425,19 @@ end;
 procedure TMobs.SetPosition(const I, X, Y: Integer);
 begin
   FCoord[I] := Format(F, [X, Y]);
+end;
+
+{ TPlayer }
+
+constructor TPlayer.Create;
+begin
+  Idx := -1;
+end;
+
+destructor TPlayer.Destroy;
+begin
+
+  inherited;
 end;
 
 end.
