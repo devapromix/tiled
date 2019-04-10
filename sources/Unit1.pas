@@ -25,7 +25,7 @@ var
 
 implementation
 
-uses Math, WorldMap, Utils, Mods, Mobs, MsgLog;
+uses Math, WorldMap, Utils, Mods, Mobs, MsgLog, Creature;
 
 {$R *.dfm}
 
@@ -49,7 +49,6 @@ end;
 
 procedure TForm1.FormCreate(Sender: TObject);
 begin
-
   Map := TWorldMap.Create(Self);
   GMods.SetCurrent('twilight_forest');
   // GMods.SetCurrent('elvion');
@@ -89,10 +88,23 @@ begin
 end;
 
 procedure TForm1.FormKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
+var
+  Plr: TMobInfo;
 begin
   case Key of
     Ord('I'):
       ;
+    Ord('L'):
+      with Map.GetCurrentMapMobs do
+      begin
+        IsLook := not IsLook;
+        if IsLook then
+        begin
+          Plr := Get(Player.Idx);
+          LX := Plr.X;
+          LY := Plr.Y;
+        end;
+      end;
     37:
       begin
         Map.GetCurrentMapMobs.Move(-1, 0);
@@ -123,6 +135,7 @@ begin
   Surface.Canvas.FillRect(Rect(0, 0, Surface.Width, Surface.Height));
   Map.Render(Surface.Canvas);
   Map.GetCurrentMapMobs.Render(Surface.Canvas);
+  Map.GetCurrentMapMobs.Player.Render(Surface.Canvas);
   Log.Render(Surface.Canvas);
   Canvas.Draw(0, 0, Surface);
 end;

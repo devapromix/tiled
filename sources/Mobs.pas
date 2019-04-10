@@ -27,6 +27,7 @@ type
     constructor Create;
     destructor Destroy; override;
     property Idx: Integer read FIdx write FIdx;
+    procedure Render(Canvas: TCanvas);
   end;
 
 type
@@ -40,9 +41,14 @@ type
     FDam: TStringList;
     FRad: TStringList;
     FPlayer: TPlayer;
+    FIsLook: Boolean;
+    FLX: Byte;
+    FLY: Byte;
+    procedure Miss(Atk: TMobInfo);
   public
     MobLB: TBitmap;
     Lifebar: TPNGImage;
+    Frame: TPNGImage;
     constructor Create;
     destructor Destroy; override;
     procedure Clear;
@@ -63,6 +69,9 @@ type
     function GetDist(FromX, FromY, ToX, ToY: Single): Word;
     procedure Render(Canvas: TCanvas);
     property Player: TPlayer read FPlayer write FPlayer;
+    property IsLook: Boolean read FIsLook write FIsLook;
+    property LX: Byte read FLX write FLX;
+    property LY: Byte read FLY write FLY;
   end;
 
 implementation
@@ -128,13 +137,13 @@ begin
   begin
     Dam := Math.RandomRange(Atk.MinDam, Atk.MaxDam + 1);
     ModLife(DefId, -Dam);
+    Log.Add(Format('%s: %d HP', [Def.Name, -Dam]));
   end
   else
-  begin
-    // Miss
-  end;
+    Miss(Atk);
   if Get(DefId).Life = 0 then
   begin
+    Log.Add(Format('%s убит', [Def.Name]));
     Del(DefId);
     Map.GetCurrentMap.FMap[lrMonsters][NX][NY] := -1;
     Player.Idx := -1;
@@ -166,10 +175,13 @@ end;
 
 constructor TMobs.Create;
 begin
-  Player:= TPlayer.Create;
+  FIsLook := False;
+  Player := TPlayer.Create;
   MobLB := TBitmap.Create;
   Lifebar := TPNGImage.Create;
   Lifebar.LoadFromFile(GMods.GetPath('images', 'lifebar.png'));
+  Frame := TPNGImage.Create;
+  Frame.LoadFromFile(GMods.GetPath('images', 'frame.png'));
   FForce := TStringList.Create;
   FCoord := TStringList.Create;
   FID := TStringList.Create;
@@ -192,9 +204,9 @@ begin
 end;
 
 destructor TMobs.Destroy;
-//var
-//  I: Integer;
-//  S: string;
+// var
+// I: Integer;
+// S: string;
 begin
   {
     S := '';
@@ -207,6 +219,7 @@ begin
   FreeAndNil(FPlayer);
   FreeAndNil(MobLB);
   FreeAndNil(Lifebar);
+  FreeAndNil(Frame);
   FreeAndNil(FForce);
   FreeAndNil(FCoord);
   FreeAndNil(FID);
@@ -255,7 +268,7 @@ begin
       begin
         with Map.GetMap(N).TiledObject[I] do
         begin
-          if LowerCase(Name) = 'human' then
+          if LowerCase(Name) = 'player' then
           begin
             Player.Idx := J;
             F := 1;
@@ -340,6 +353,15 @@ begin
     Canvas.Draw(X + 1, Y, Map.GetCurrentMapMobs.MobLB);
     Canvas.Draw(X, Y, Map.GetCurrentMap.TiledObject[M.Id].Image);
   end;
+  // if IsLook then
+  begin
+    Canvas.Draw(LX * Map.GetCurrentMap.TileSize, LY * Map.GetCurrentMap.TileSize, Map.GetCurrentMapMobs.Frame);
+  end;
+end;
+
+procedure TMobs.Miss(Atk: TMobInfo);
+begin
+  Log.Add(Format('%s промахивается.', [Atk.Name]));
 end;
 
 procedure TMobs.Move(const AtkId, DX, DY: Integer);
@@ -348,6 +370,12 @@ var
   Atk, Def: TMobInfo;
   ObjType, ItemType: string;
 begin
+  if IsLook then
+  begin
+    FLX := EnsureRange(FLX + DX, 0, Map.;
+    FLY := FLY + DY;
+    Exit;
+  end;
   if Player.Idx = -1 then
     Exit;
   Atk := Get(AtkId);
@@ -438,6 +466,16 @@ destructor TPlayer.Destroy;
 begin
 
   inherited;
+end;
+
+procedure TPlayer.Render(Canvas: TCanvas);
+var
+  M: TMobInfo;
+  S: string;
+begin
+  M := Map.GetCurrentMapMobs.Get(Idx);
+  S := Format('%s %d/%d %d-%d', [M.Name, M.Life, M.MaxLife, M.MinDam, M.MaxDam]);
+  Canvas.TextOut(0, Map.GetCurrentMap.TileSize * Map.GetCurrentMap.Height, S);
 end;
 
 end.

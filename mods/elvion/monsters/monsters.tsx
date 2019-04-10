@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?>
+﻿<?xml version="1.0" encoding="UTF-8"?>
 <tileset name="monsters" tilewidth="32" tileheight="32" tilecount="15" columns="0">
  <grid orientation="orthogonal" width="1" height="1"/>
  <tile id="0" type="player">
@@ -10,7 +10,7 @@
     <property name="life" type="int" value="100"/>
     <property name="radius" type="int" value="5"/>
     <property name="level" type="int" value="1"/>
-    <property name="name" value="Human"/>
+    <property name="name" value="Player"/>
  </properties>
  </tile>
  <tile id="1" type="rat">
@@ -22,7 +22,7 @@
     <property name="life" type="int" value="10"/>
     <property name="radius" type="int" value="5"/>
     <property name="level" type="int" value="1"/>
-    <property name="name" value="Rat"/>
+    <property name="name" value="Крыса"/>
  </properties>
  </tile>
  <tile id="2" type="titan">
@@ -34,11 +34,20 @@
     <property name="life" type="int" value="20"/>
     <property name="radius" type="int" value="5"/>
     <property name="level" type="int" value="1"/>
-    <property name="name" value="Rat"/>
+    <property name="name" value="Титан"/>
  </properties>
  </tile>
  <tile id="3" type="raven">
   <image width="32" height="32" source="raven.png"/>
+  <properties>
+    <property name="min_damage" type="int" value="1"/>
+    <property name="max_damage" type="int" value="2"/>
+    <property name="exp" type="int" value="7"/>
+    <property name="life" type="int" value="20"/>
+    <property name="radius" type="int" value="5"/>
+    <property name="level" type="int" value="1"/>
+    <property name="name" value="Ворон"/>
+ </properties>
  </tile>
  <tile id="4" type="spider">
   <image width="32" height="32" source="orb_spider.png"/>
@@ -94,7 +103,7 @@
     <property name="life" type="int" value="12"/>
     <property name="radius" type="int" value="3"/>
     <property name="level" type="int" value="1"/>
-    <property name="name" value="Spider"/>
+    <property name="name" value="Паук"/>
  </properties>
  </tile>
  <tile id="14" type="undead">

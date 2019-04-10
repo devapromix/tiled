@@ -51,7 +51,7 @@ end;
 
 procedure TLog.Render(Canvas: TCanvas);
 begin
-  Canvas.TextOut(0, Map.GetCurrentMap.TileSize * Map.GetCurrentMap.Height, Get);
+  Canvas.TextOut(0, Map.GetCurrentMap.TileSize * Map.GetCurrentMap.Height + 16, Get);
 end;
 
 procedure TLog.Turn;
