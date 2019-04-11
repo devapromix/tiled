@@ -136,10 +136,12 @@ var
           for J := 0 to PropCount - 1 do
           begin
             NodeProp := NodeProps.ChildNodes[J];
+            Name := NodeProp.Attributes['name'];
+            Value := NodeProp.Attributes['value'];
+            if (Name = 'name') then
+              TiledObject[ID].Name := Trim(Value);
             if (Section = 'tiles') then
             begin
-              Name := NodeProp.Attributes['name'];
-              Value := NodeProp.Attributes['value'];
               if (Name = 'passable') then
                 TiledObject[ID].Passable := StrToBoolDef(Value, False);
               if (Name = 'transparent') then
@@ -147,8 +149,6 @@ var
             end;
             if Section = 'objects' then
             begin
-              Name := NodeProp.Attributes['name'];
-              Value := NodeProp.Attributes['value'];
               if (Name = 'passable') then
                 TiledObject[ID].Passable := StrToBoolDef(Value, False);
               if (Name = 'transparent') then
@@ -156,11 +156,6 @@ var
             end;
             if Section = 'monsters' then
             begin
-              Name := NodeProp.Attributes['name'];
-              Value := NodeProp.Attributes['value'];
-              // ShowMessage(Value);
-              if (Name = 'name') then
-                TiledObject[ID].Name := Trim(Value);
               if (Name = 'level') then
                 TiledObject[ID].Level := StrToIntDef(Value, 1);
               if (Name = 'life') then

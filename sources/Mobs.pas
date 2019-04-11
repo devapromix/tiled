@@ -45,6 +45,7 @@ type
     FLX: Byte;
     FLY: Byte;
     procedure Miss(Atk: TMobInfo);
+    function Look(DX, DY: Integer): Boolean;
   public
     MobLB: TBitmap;
     Lifebar: TPNGImage;
@@ -52,6 +53,7 @@ type
     constructor Create;
     destructor Destroy; override;
     procedure Clear;
+    procedure ChLook;
     procedure LoadFromMap(const N: Integer);
     procedure Add(const Force, X, Y, Id: Integer; N: string; L, MaxL, MinD, MaxD, R: Integer); overload;
     procedure Add(const P: TMobInfo); overload;
@@ -155,6 +157,20 @@ begin
       end;
   end;
 
+end;
+
+procedure TMobs.ChLook;
+var
+  Plr: TMobInfo;
+begin
+  IsLook := not IsLook;
+  if IsLook then
+  begin
+    Plr := Get(Player.Idx);
+    LX := Plr.X;
+    LY := Plr.Y;
+  end;
+  Log.Turn;
 end;
 
 procedure TMobs.Clear;
@@ -353,9 +369,31 @@ begin
     Canvas.Draw(X + 1, Y, Map.GetCurrentMapMobs.MobLB);
     Canvas.Draw(X, Y, Map.GetCurrentMap.TiledObject[M.Id].Image);
   end;
-  // if IsLook then
+  if IsLook then
   begin
     Canvas.Draw(LX * Map.GetCurrentMap.TileSize, LY * Map.GetCurrentMap.TileSize, Map.GetCurrentMapMobs.Frame);
+  end;
+end;
+
+function TMobs.Look(DX, DY: Integer): Boolean;
+var
+  S: string;
+begin
+  Result := False;
+  if IsLook then
+  begin
+    FLX := EnsureRange(FLX + DX, 0, Map.GetCurrentMap.Width - 1);
+    FLY := EnsureRange(FLY + DY, 0, Map.GetCurrentMap.Height - 1);
+    S := '';
+    with Map.GetCurrentMap do
+    begin
+      S := TiledObject[FMap[lrTiles][FLX][FLY]].Name;
+      if (FMap[lrObjects][FLX][FLY] >= 0) then
+        S := S + '/' + TiledObject[FMap[lrObjects][FLX][FLY]].Name;
+    end;
+    Log.Turn;
+    Log.Add(S);
+    Result := True;
   end;
 end;
 
@@ -370,13 +408,7 @@ var
   Atk, Def: TMobInfo;
   ObjType, ItemType: string;
 begin
-  if IsLook then
-  begin
-    FLX := EnsureRange(FLX + DX, 0, Map.;
-    FLY := FLY + DY;
-    Exit;
-  end;
-  if Player.Idx = -1 then
+  if Look(DX, DY) or (Player.Idx = -1) then
     Exit;
   Atk := Get(AtkId);
   if Atk.Life <= 0 then

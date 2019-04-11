@@ -88,23 +88,12 @@ begin
 end;
 
 procedure TForm1.FormKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
-var
-  Plr: TMobInfo;
 begin
   case Key of
     Ord('I'):
       ;
     Ord('L'):
-      with Map.GetCurrentMapMobs do
-      begin
-        IsLook := not IsLook;
-        if IsLook then
-        begin
-          Plr := Get(Player.Idx);
-          LX := Plr.X;
-          LY := Plr.Y;
-        end;
-      end;
+      Map.GetCurrentMapMobs.ChLook;
     37:
       begin
         Map.GetCurrentMapMobs.Move(-1, 0);
