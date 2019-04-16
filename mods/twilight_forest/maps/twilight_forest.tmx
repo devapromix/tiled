@@ -2,7 +2,7 @@
 <map version="1.2" tiledversion="1.2.3" orientation="orthogonal" renderorder="right-down" width="16" height="16" tilewidth="32" tileheight="32" infinite="0" nextlayerid="5" nextobjectid="1">
  <properties>
   <property name="Level" type="int" value="1"/>
-  <property name="Name" value="Forest of Bears"/>
+  <property name="Name" value="Сумеречный Лес"/>
  </properties>
  <tileset firstgid="1" source="../../elvion/tiles/tiles.tsx"/>
  <tileset firstgid="7" source="../../elvion/objects/objects.tsx"/>

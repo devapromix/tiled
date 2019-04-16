@@ -24,7 +24,12 @@ type
       Image: TPNGImage;
       Name: string;
       TileType: string;
+      Strength: Integer;
+      Dexterity: Integer;
+      Protection: Integer;
+      Reach: Integer;
       Level: Integer;
+      Exp: Integer;
       Life: Integer;
       MinDam: Integer;
       MaxDam: Integer;
@@ -156,8 +161,18 @@ var
             end;
             if Section = 'monsters' then
             begin
+              if (Name = 'strength') then
+                TiledObject[ID].Strength := StrToIntDef(Value, 1);
+              if (Name = 'dexterity') then
+                TiledObject[ID].Dexterity := StrToIntDef(Value, 1);
+              if (Name = 'protection') then
+                TiledObject[ID].Protection := StrToIntDef(Value,0);
+              if (Name = 'reach') then
+                TiledObject[ID].Reach := StrToIntDef(Value, 0);
               if (Name = 'level') then
                 TiledObject[ID].Level := StrToIntDef(Value, 1);
+              if (Name = 'exp') then
+                TiledObject[ID].Exp := StrToIntDef(Value, 0);
               if (Name = 'life') then
                 TiledObject[ID].Life := StrToIntDef(Value, 5);
               if (Name = 'radius') then

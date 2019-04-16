@@ -49,21 +49,22 @@ end;
 
 procedure TForm1.FormCreate(Sender: TObject);
 begin
-  Map := TWorldMap.Create(Self);
-  GMods.SetCurrent('twilight_forest');
+  // Map := TWorldMap.Create(Self);
+  // GMods.SetCurrent('twilight_forest');
   // GMods.SetCurrent('elvion');
   Surface := TBitmap.Create;
   Surface.Canvas.Brush.Style := bsClear;
   Surface.Canvas.Font.Name := 'Courier New';
   Surface.Canvas.Font.Color := clWhite;
   Surface.Canvas.Font.Size := 10;
-  RefreshMap;
+  // RefreshMap;
 end;
 
 procedure TForm1.FormDestroy(Sender: TObject);
 begin
   FreeAndNil(Surface);
-  FreeAndNil(Map);
+  if Assigned(Map) then
+    FreeAndNil(Map);
 end;
 
 procedure Use;
@@ -91,7 +92,53 @@ procedure TForm1.FormKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState)
 begin
   case Key of
     Ord('I'):
-      ;
+      begin
+        if Assigned(Map) then
+          FreeAndNil(Map);
+        Map := TWorldMap.Create(Self);
+        GMods.SetCurrent('twilight_forest');
+        RefreshMap;
+      end;
+    Ord('O'):
+      begin
+        if Assigned(Map) then
+          FreeAndNil(Map);
+        Map := TWorldMap.Create(Self);
+        GMods.SetCurrent('elvion');
+        RefreshMap;
+      end;
+    Ord('S'):
+      begin
+        Map.GetCurrentMapMobs.Player.Save;
+      end;
+    Ord('R'):
+      begin
+        Map.GetCurrentMapMobs.Player.Load;
+      end;
+    Ord('0'):
+      begin
+        if Assigned(Map) then
+          FreeAndNil(Map);
+        Map := TWorldMap.Create(Self);
+        GMods.SetCurrent('twilight_forest', 'town.ini');
+        RefreshMap;
+      end;
+    Ord('1'):
+      begin
+        if Assigned(Map) then
+          FreeAndNil(Map);
+        Map := TWorldMap.Create(Self);
+        GMods.SetCurrent('twilight_forest', 'twilight_forest.ini');
+        RefreshMap;
+      end;
+    Ord('2'):
+      begin
+        if Assigned(Map) then
+          FreeAndNil(Map);
+        Map := TWorldMap.Create(Self);
+        GMods.SetCurrent('twilight_forest', 'dungeon.ini');
+        RefreshMap;
+      end;
     Ord('L'):
       Map.GetCurrentMapMobs.ChLook;
     37:
@@ -122,10 +169,13 @@ procedure TForm1.FormPaint(Sender: TObject);
 begin
   Surface.Canvas.Brush.Color := clBlack;
   Surface.Canvas.FillRect(Rect(0, 0, Surface.Width, Surface.Height));
-  Map.Render(Surface.Canvas);
-  Map.GetCurrentMapMobs.Render(Surface.Canvas);
-  Map.GetCurrentMapMobs.Player.Render(Surface.Canvas);
-  Log.Render(Surface.Canvas);
+  if Assigned(Map) then
+  begin
+    Map.Render(Surface.Canvas);
+    Map.GetCurrentMapMobs.Render(Surface.Canvas);
+    Map.GetCurrentMapMobs.Player.Render(Surface.Canvas);
+    Log.Render(Surface.Canvas);
+  end;
   Canvas.Draw(0, 0, Surface);
 end;
 

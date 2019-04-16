@@ -11,12 +11,18 @@ type
     X: Integer;
     Y: Integer;
     Id: Integer;
+    Level: Integer;
+    Exp: Integer;
     Name: string;
     Life: Integer;
     MaxLife: Integer;
     MinDam: Integer;
     MaxDam: Integer;
     Radius: Integer;
+    Strength: Integer;
+    Dexterity: Integer;
+    Protection: Integer;
+    Reach: Integer;
   end;
 
 type
@@ -28,6 +34,9 @@ type
     destructor Destroy; override;
     property Idx: Integer read FIdx write FIdx;
     procedure Render(Canvas: TCanvas);
+    procedure FindIdx;
+    procedure Save;
+    procedure Load;
   end;
 
 type
@@ -36,10 +45,13 @@ type
     FForce: TStringList;
     FCoord: TStringList;
     FID: TStringList;
+    FLevel: TStringList;
     FName: TStringList;
     FLife: TStringList;
     FDam: TStringList;
     FRad: TStringList;
+    FAttr: TStringList;
+    FReach: TStringList;
     FPlayer: TPlayer;
     FIsLook: Boolean;
     FLX: Byte;
@@ -55,7 +67,7 @@ type
     procedure Clear;
     procedure ChLook;
     procedure LoadFromMap(const N: Integer);
-    procedure Add(const Force, X, Y, Id: Integer; N: string; L, MaxL, MinD, MaxD, R: Integer); overload;
+    procedure Add(const Force, X, Y, Id, Level, Exp: Integer; N: string; L, MaxL, MinD, MaxD, R, Str, Dex, Prot, Reach: Integer); overload;
     procedure Add(const P: TMobInfo); overload;
     function BarWidth(CX, MX, GS: Integer): Integer;
     function Count: Integer;
@@ -79,7 +91,7 @@ type
 implementation
 
 uses
-  SysUtils, Math, Dialogs, WorldMap, Mods, TiledMap, PathFind, MsgLog;
+  SysUtils, Math, Dialogs, WorldMap, Mods, TiledMap, PathFind, MsgLog, Utils;
 
 const
   F = '%d=%d';
@@ -115,31 +127,45 @@ begin
   Result := I;
 end;
 
-procedure TMobs.Add(const Force, X, Y, Id: Integer; N: string; L, MaxL, MinD, MaxD, R: Integer);
+procedure TMobs.Add(const Force, X, Y, Id, Level, Exp: Integer; N: string; L, MaxL, MinD, MaxD, R, Str, Dex, Prot, Reach: Integer);
 begin
   FForce.Append(Force.ToString);
   FCoord.Append(Format(F, [X, Y]));
   FID.Append(Id.ToString);
+  FLevel.Append(Format(F, [Level, Exp]));
   FName.Append(N);
   FLife.Append(Format(F, [L, MaxL]));
   FDam.Append(Format(F, [MinD, MaxD]));
   FRad.Append(R.ToString);
+  FAttr.Append(Format(F, [Str, Dex]));
+  FReach.Append(Format(F, [Prot, Reach]));
 end;
 
 procedure TMobs.Add(const P: TMobInfo);
 begin
-  Self.Add(P.Force, P.X, P.Y, P.Id, P.Name, P.Life, P.MaxLife, P.MinDam, P.MaxDam, P.Radius);
+  Self.Add(P.Force, P.X, P.Y, P.Id, P.Level, P.Exp, P.Name, P.Life, P.MaxLife, P.MinDam, P.MaxDam, P.Radius, P.Strength, P.Dexterity,
+    P.Protection, P.Reach);
 end;
 
 procedure TMobs.Attack(const NX, NY, AtkId, DefId: Integer; Atk, Def: TMobInfo);
 var
   I, Dam: Integer;
 begin
-  if (Math.RandomRange(0, 3 + 1) >= Math.RandomRange(0, 3 + 1)) then
+  if (Math.RandomRange(0, Atk.Dexterity + 1) >= Math.RandomRange(0, Def.Dexterity + 1)) then
   begin
     Dam := Math.RandomRange(Atk.MinDam, Atk.MaxDam + 1);
-    ModLife(DefId, -Dam);
-    Log.Add(Format('%s: %d HP', [Def.Name, -Dam]));
+    Dam := EnsureRange(Dam - Def.Protection, 1, 255);
+    if (Math.RandomRange(0, Atk.Level + 1) > Math.RandomRange(0, 100)) then
+    begin
+      Dam := Dam + Atk.Strength;
+      ModLife(DefId, -Dam);
+      Log.Add(Format('%s: крит %d HP', [Def.Name, -Dam]));
+    end
+    else
+    begin
+      ModLife(DefId, -Dam);
+      Log.Add(Format('%s: %d HP', [Def.Name, -Dam]));
+    end;
   end
   else
     Miss(Atk);
@@ -178,10 +204,13 @@ begin
   FForce.Clear;
   FCoord.Clear;
   FID.Clear;
+  FLevel.Clear;
   FName.Clear;
   FLife.Clear;
   FDam.Clear;
   FRad.Clear;
+  FAttr.Clear;
+  FReach.Clear;
 end;
 
 function TMobs.Count: Integer;
@@ -201,10 +230,13 @@ begin
   FForce := TStringList.Create;
   FCoord := TStringList.Create;
   FID := TStringList.Create;
+  FLevel := TStringList.Create;
   FName := TStringList.Create;
   FLife := TStringList.Create;
   FDam := TStringList.Create;
   FRad := TStringList.Create;
+  FAttr := TStringList.Create;
+  FReach := TStringList.Create;
 end;
 
 function TMobs.Del(I: Integer): Boolean;
@@ -212,10 +244,13 @@ begin
   FForce.Delete(I);
   FCoord.Delete(I);
   FID.Delete(I);
+  FLevel.Delete(I);
   FName.Delete(I);
   FLife.Delete(I);
   FDam.Delete(I);
   FRad.Delete(I);
+  FAttr.Delete(I);
+  FReach.Delete(I);
   Result := True;
 end;
 
@@ -239,10 +274,13 @@ begin
   FreeAndNil(FForce);
   FreeAndNil(FCoord);
   FreeAndNil(FID);
+  FreeAndNil(FLevel);
   FreeAndNil(FName);
   FreeAndNil(FLife);
   FreeAndNil(FDam);
   FreeAndNil(FRad);
+  FreeAndNil(FAttr);
+  FreeAndNil(FReach);
   inherited;
 end;
 
@@ -252,12 +290,18 @@ begin
   Result.X := FCoord.KeyNames[I].ToInteger;
   Result.Y := FCoord.ValueFromIndex[I].ToInteger;
   Result.Id := FID[I].ToInteger;
+  Result.Level := FLevel.KeyNames[I].ToInteger;
+  Result.Exp := FLevel.ValueFromIndex[I].ToInteger;
   Result.Name := FName[I];
   Result.Life := FLife.KeyNames[I].ToInteger;
   Result.MaxLife := FLife.ValueFromIndex[I].ToInteger;
   Result.MinDam := FDam.KeyNames[I].ToInteger;
   Result.MaxDam := FDam.ValueFromIndex[I].ToInteger;
   Result.Radius := FRad[I].ToInteger;
+  Result.Strength := FAttr.KeyNames[I].ToInteger;
+  Result.Dexterity := FAttr.ValueFromIndex[I].ToInteger;
+  Result.Protection := FReach.KeyNames[I].ToInteger;
+  Result.Reach := FReach.ValueFromIndex[I].ToInteger;
 end;
 
 function TMobs.GetDist(FromX, FromY, ToX, ToY: Single): Word;
@@ -289,7 +333,7 @@ begin
             Player.Idx := J;
             F := 1;
           end;
-          Add(F, X, Y, I, Name, Life, Life, MinDam, MaxDam, Radius);
+          Add(F, X, Y, I, Level, Exp, Name, Life, Life, MinDam, MaxDam, Radius, Strength, Dexterity, Protection, Reach);
           Inc(J);
         end;
       end;
@@ -500,6 +544,47 @@ begin
   inherited;
 end;
 
+procedure TPlayer.FindIdx;
+var
+  I: Integer;
+  P: TMobInfo;
+begin
+  Idx := -1;
+  for I := 0 to Map.GetCurrentMapMobs.Count - 1 do
+  begin
+    P := Map.GetCurrentMapMobs.Get(I);
+    if P.Force = 1 then
+    begin
+      Idx := I;
+      Break;
+    end;
+  end;
+end;
+
+procedure TPlayer.Load;
+var
+  Path: string;
+  SL: TStringList;
+  M: TMobInfo;
+  Life, MaxLife: Integer;
+begin
+  Path := GetPath('saves') + 'player.sav';
+  SL := TStringList.Create;
+  try
+    SL.LoadFromFile(Path, TEncoding.UTF8);
+    Life := StrToInt(SL[0]);
+    MaxLife := StrToInt(SL[1]);
+    M := Map.GetCurrentMapMobs.Get(Idx);
+    Map.GetCurrentMapMobs.Del(Idx);
+    M.Life := Life;
+    M.MaxLife := MaxLife;
+    Map.GetCurrentMapMobs.Add(M);
+    Map.GetCurrentMapMobs.Player.FindIdx;
+  finally
+    FreeAndNil(SL);
+  end;
+end;
+
 procedure TPlayer.Render(Canvas: TCanvas);
 var
   M: TMobInfo;
@@ -508,6 +593,24 @@ begin
   M := Map.GetCurrentMapMobs.Get(Idx);
   S := Format('%s %d/%d %d-%d', [M.Name, M.Life, M.MaxLife, M.MinDam, M.MaxDam]);
   Canvas.TextOut(0, Map.GetCurrentMap.TileSize * Map.GetCurrentMap.Height, S);
+end;
+
+procedure TPlayer.Save;
+var
+  P: TMobInfo;
+  Path: string;
+  SL: TStringList;
+begin
+  Path := GetPath('saves') + 'player.sav';
+  SL := TStringList.Create;
+  P := Map.GetCurrentMapMobs.Get(Idx);
+  try
+    SL.Append(IntToStr(P.Life));
+    SL.Append(IntToStr(P.MaxLife));
+    SL.SaveToFile(Path, TEncoding.UTF8);
+  finally
+    FreeAndNil(SL);
+  end;
 end;
 
 end.

@@ -17,7 +17,8 @@ type
     constructor Create;
     destructor Destroy; override;
     function GetPath(const SubDir, FileName: string): string;
-    procedure SetCurrent(const FileName: string);
+    procedure SetCurrent(const FileName: string); overload;
+    procedure SetCurrent(const FileName, MapFileName: string); overload;
     property Current: string read FCurrent;
     function PlayerX: Integer;
     function PlayerY: Integer;
@@ -75,6 +76,13 @@ end;
 function TMods.PlayerY: Integer;
 begin
   Result := GetCurValue('PlayerY', 1);
+end;
+
+procedure TMods.SetCurrent(const FileName, MapFileName: string);
+begin
+  FCurrent := FileName;
+  FSL.LoadFromFile(GetPath('', 'mod.cfg'), TEncoding.UTF8);
+  Map.LoadFromFile(MapFileName);
 end;
 
 procedure TMods.SetCurrent(const FileName: string);

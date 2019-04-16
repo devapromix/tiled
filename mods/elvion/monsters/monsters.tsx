@@ -4,6 +4,10 @@
  <tile id="0" type="player">
   <image width="32" height="32" source="human.png"/>
   <properties>
+    <property name="strength" type="int" value="5"/>
+    <property name="dexterity" type="int" value="5"/>
+    <property name="protection" type="int" value="5"/>
+    <property name="reach" type="int" value="0"/>
     <property name="min_damage" type="int" value="1"/>
     <property name="max_damage" type="int" value="2"/>
     <property name="exp" type="int" value="0"/>
@@ -97,6 +101,10 @@
  <tile id="13" type="spider">
   <image width="32" height="32" source="spider.png"/>
   <properties>
+    <property name="strength" type="int" value="5"/>
+    <property name="dexterity" type="int" value="5"/>
+    <property name="protection" type="int" value="0"/>
+    <property name="reach" type="int" value="0"/>
     <property name="min_damage" type="int" value="1"/>
     <property name="max_damage" type="int" value="2"/>
     <property name="exp" type="int" value="4"/>
