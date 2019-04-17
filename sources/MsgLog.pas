@@ -2,7 +2,9 @@ unit MsgLog;
 
 interface
 
-uses Classes, Graphics;
+uses
+  Classes,
+  Graphics;
 
 type
   TLog = class(TObject)
@@ -23,7 +25,9 @@ var
 
 implementation
 
-uses SysUtils, WorldMap;
+uses
+  SysUtils,
+  WorldMap;
 
 { TLog }
 

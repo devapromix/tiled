@@ -49,15 +49,11 @@ end;
 
 procedure TForm1.FormCreate(Sender: TObject);
 begin
-  // Map := TWorldMap.Create(Self);
-  // GMods.SetCurrent('twilight_forest');
-  // GMods.SetCurrent('elvion');
   Surface := TBitmap.Create;
   Surface.Canvas.Brush.Style := bsClear;
   Surface.Canvas.Font.Name := 'Courier New';
   Surface.Canvas.Font.Color := clWhite;
   Surface.Canvas.Font.Size := 10;
-  // RefreshMap;
 end;
 
 procedure TForm1.FormDestroy(Sender: TObject);
@@ -86,27 +82,19 @@ begin
     Map.GetCurrentMapMobs.Move(0, 0);
     Log.Add(Map.GetCurrentMap.Name);
   end;
+  if (ObjType = 'player_finish') then
+  begin
+    if Assigned(Map) then
+      FreeAndNil(Map);
+    Map := TWorldMap.Create(Form1);
+    GMods.SetCurrent('twilight_forest', 'town.ini');
+    RefreshMap;
+  end;
 end;
 
 procedure TForm1.FormKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
 begin
   case Key of
-    Ord('I'):
-      begin
-        if Assigned(Map) then
-          FreeAndNil(Map);
-        Map := TWorldMap.Create(Self);
-        GMods.SetCurrent('twilight_forest');
-        RefreshMap;
-      end;
-    Ord('O'):
-      begin
-        if Assigned(Map) then
-          FreeAndNil(Map);
-        Map := TWorldMap.Create(Self);
-        GMods.SetCurrent('elvion');
-        RefreshMap;
-      end;
     Ord('S'):
       begin
         Map.GetCurrentMapMobs.Player.Save;

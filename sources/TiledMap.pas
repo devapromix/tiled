@@ -2,7 +2,9 @@ unit TiledMap;
 
 interface
 
-uses System.Classes, Vcl.Imaging.PNGImage;
+uses
+  System.Classes,
+  Vcl.Imaging.PNGImage;
 
 type
   TTiledMap = class(TObject)
@@ -56,7 +58,15 @@ type
 
 implementation
 
-uses System.SysUtils, Math, Utils, Xml.XMLDoc, Xml.XMLIntf, System.IOUtils, Dialogs, Mods;
+uses
+  System.SysUtils,
+  Math,
+  Utils,
+  Xml.XMLDoc,
+  Xml.XMLIntf,
+  System.IOUtils,
+  Dialogs,
+  Mods;
 
 { TTiledMap }
 
@@ -166,7 +176,7 @@ var
               if (Name = 'dexterity') then
                 TiledObject[ID].Dexterity := StrToIntDef(Value, 1);
               if (Name = 'protection') then
-                TiledObject[ID].Protection := StrToIntDef(Value,0);
+                TiledObject[ID].Protection := StrToIntDef(Value, 0);
               if (Name = 'reach') then
                 TiledObject[ID].Reach := StrToIntDef(Value, 0);
               if (Name = 'level') then

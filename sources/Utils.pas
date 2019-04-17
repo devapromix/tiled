@@ -6,7 +6,9 @@ function GetPath(SubDir: string): string;
 
 implementation
 
-uses SysUtils, Dialogs;
+uses
+  SysUtils,
+  Dialogs;
 
 function GetPath(SubDir: string): string;
 begin

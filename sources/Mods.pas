@@ -2,7 +2,8 @@ unit Mods;
 
 interface
 
-uses System.Classes;
+uses
+  System.Classes;
 
 type
   TMods = class(TObject)
@@ -17,11 +18,8 @@ type
     constructor Create;
     destructor Destroy; override;
     function GetPath(const SubDir, FileName: string): string;
-    procedure SetCurrent(const FileName: string); overload;
     procedure SetCurrent(const FileName, MapFileName: string); overload;
     property Current: string read FCurrent;
-    function PlayerX: Integer;
-    function PlayerY: Integer;
   end;
 
 var
@@ -29,7 +27,12 @@ var
 
 implementation
 
-uses System.SysUtils, Utils, WorldMap, Dialogs, Mobs;
+uses
+  System.SysUtils,
+  Utils,
+  WorldMap,
+  Dialogs,
+  Mobs;
 
 { TMods }
 
@@ -68,31 +71,11 @@ begin
     Result := Utils.GetPath('mods' + PathDelim + Default +PathDelim + SubDir) + FileName;
 end;
 
-function TMods.PlayerX: Integer;
-begin
-  Result := GetCurValue('PlayerX', 1);
-end;
-
-function TMods.PlayerY: Integer;
-begin
-  Result := GetCurValue('PlayerY', 1);
-end;
-
 procedure TMods.SetCurrent(const FileName, MapFileName: string);
 begin
   FCurrent := FileName;
   FSL.LoadFromFile(GetPath('', 'mod.cfg'), TEncoding.UTF8);
   Map.LoadFromFile(MapFileName);
-end;
-
-procedure TMods.SetCurrent(const FileName: string);
-var
-  FN: string;
-begin
-  FCurrent := FileName;
-  FSL.LoadFromFile(GetPath('', 'mod.cfg'), TEncoding.UTF8);
-  FN := GetCurValue('World', '');
-  Map.LoadFromFile(FN);
 end;
 
 initialization

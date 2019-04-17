@@ -3,7 +3,9 @@
 interface
 
 uses
-  Classes, Vcl.Graphics, Vcl.Imaging.PNGImage;
+  Classes,
+  Vcl.Graphics,
+  Vcl.Imaging.PNGImage;
 
 type
   TMobInfo = record
@@ -91,7 +93,15 @@ type
 implementation
 
 uses
-  SysUtils, Math, Dialogs, WorldMap, Mods, TiledMap, PathFind, MsgLog, Utils;
+  SysUtils,
+  Math,
+  Dialogs,
+  WorldMap,
+  Mods,
+  TiledMap,
+  PathFind,
+  MsgLog,
+  Utils;
 
 const
   F = '%d=%d';
@@ -182,7 +192,6 @@ begin
         Break;
       end;
   end;
-
 end;
 
 procedure TMobs.ChLook;
@@ -338,7 +347,6 @@ begin
         end;
       end;
     end;
-  //
 end;
 
 procedure TMobs.ModLife(const Index, Value: Integer);
