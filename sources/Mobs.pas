@@ -31,11 +31,14 @@ type
   TPlayer = class(TObject)
   private
     FIdx: Integer;
+    FIsDefeat: Boolean;
   public
     constructor Create;
     destructor Destroy; override;
     property Idx: Integer read FIdx write FIdx;
+    property IsDefeat: Boolean read FIsDefeat write FIsDefeat;
     procedure Render(Canvas: TCanvas);
+    procedure Defeat;
     procedure FindIdx;
     procedure Save;
     procedure Load;
@@ -191,6 +194,8 @@ begin
         Player.Idx := I;
         Break;
       end;
+    if Player.Idx = -1 then
+      Player.Defeat;
   end;
 end;
 
@@ -198,6 +203,8 @@ procedure TMobs.ChLook;
 var
   Plr: TMobInfo;
 begin
+  if Player.IsDefeat then
+    Exit;
   IsLook := not IsLook;
   if IsLook then
   begin
@@ -264,18 +271,7 @@ begin
 end;
 
 destructor TMobs.Destroy;
-// var
-// I: Integer;
-// S: string;
 begin
-  {
-    S := '';
-    for I := 0 to Self.Count - 1 do
-    begin
-    S := S + Format('%s,%s,%s,%s,%s', [FForce[I], FCoord[I], FID[I], FName[I], FLife[I]]) + #13#10;
-    end;
-    ShowMessage(S);
-  }
   FreeAndNil(FPlayer);
   FreeAndNil(MobLB);
   FreeAndNil(Lifebar);
@@ -364,6 +360,8 @@ var
   I, NX, NY: Integer;
   Plr, Enm: TMobInfo;
 begin
+  if Player.IsDefeat then
+    Exit;
   Log.Turn;
   Move(Player.Idx, DX, DY);
   for I := Count - 1 downto 0 do
@@ -544,6 +542,13 @@ end;
 constructor TPlayer.Create;
 begin
   Idx := -1;
+  IsDefeat := False;
+end;
+
+procedure TPlayer.Defeat;
+begin
+  IsDefeat := True;
+  ShowMessage('DEFEAT!!!');
 end;
 
 destructor TPlayer.Destroy;
@@ -569,6 +574,18 @@ begin
   end;
 end;
 
+procedure TPlayer.Render(Canvas: TCanvas);
+var
+  S: string;
+  M: TMobInfo;
+begin
+  if Map.GetCurrentMapMobs.Player.IsDefeat then
+    Exit;
+  M := Map.GetCurrentMapMobs.Get(Idx);
+  S := Format('%s HP: %d/%d Dam:%d-%d', [M.Name, M.Life, M.MaxLife, M.MinDam, M.MaxDam]);
+  Canvas.TextOut(0, Map.GetCurrentMap.TileSize * Map.GetCurrentMap.Height, S);
+end;
+
 procedure TPlayer.Load;
 var
   Path: string;
@@ -576,7 +593,11 @@ var
   M: TMobInfo;
   Life, MaxLife: Integer;
 begin
+  if IsDefeat then
+    Exit;
   Path := GetPath('saves') + 'player.sav';
+  if not FileExists(Path) then
+    Exit;
   SL := TStringList.Create;
   try
     SL.LoadFromFile(Path, TEncoding.UTF8);
@@ -593,22 +614,14 @@ begin
   end;
 end;
 
-procedure TPlayer.Render(Canvas: TCanvas);
-var
-  M: TMobInfo;
-  S: string;
-begin
-  M := Map.GetCurrentMapMobs.Get(Idx);
-  S := Format('%s %d/%d %d-%d', [M.Name, M.Life, M.MaxLife, M.MinDam, M.MaxDam]);
-  Canvas.TextOut(0, Map.GetCurrentMap.TileSize * Map.GetCurrentMap.Height, S);
-end;
-
 procedure TPlayer.Save;
 var
   P: TMobInfo;
   Path: string;
   SL: TStringList;
 begin
+  if IsDefeat then
+    Exit;
   Path := GetPath('saves') + 'player.sav';
   SL := TStringList.Create;
   P := Map.GetCurrentMapMobs.Get(Idx);

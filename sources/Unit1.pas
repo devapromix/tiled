@@ -54,6 +54,13 @@ begin
   Surface.Canvas.Font.Name := 'Courier New';
   Surface.Canvas.Font.Color := clWhite;
   Surface.Canvas.Font.Size := 10;
+
+  if Assigned(Map) then
+    FreeAndNil(Map);
+  Map := TWorldMap.Create(Self);
+  GMods.SetCurrent('twilight_forest', 'town.ini');
+  RefreshMap;
+  Map.GetCurrentMapMobs.Player.Load;
 end;
 
 procedure TForm1.FormDestroy(Sender: TObject);
@@ -68,7 +75,7 @@ var
   ObjType: string;
   Player: TMobInfo;
 begin
-  if Map.GetCurrentMapMobs.Player.Idx = -1 then
+  if Map.GetCurrentMapMobs.Player.IsDefeat then
     Exit;
   Player := Map.GetCurrentMapMobs.Get(Map.GetCurrentMapMobs.Player.Idx);
   ObjType := Map.GetCurrentMap.GetTileType(lrObjects, Player.X, Player.Y);
@@ -84,11 +91,13 @@ begin
   end;
   if (ObjType = 'player_finish') then
   begin
+    Map.GetCurrentMapMobs.Player.Save;
     if Assigned(Map) then
       FreeAndNil(Map);
     Map := TWorldMap.Create(Form1);
     GMods.SetCurrent('twilight_forest', 'town.ini');
     RefreshMap;
+    Map.GetCurrentMapMobs.Player.Load;
   end;
 end;
 
@@ -105,27 +114,33 @@ begin
       end;
     Ord('0'):
       begin
+        Map.GetCurrentMapMobs.Player.Save;
         if Assigned(Map) then
           FreeAndNil(Map);
         Map := TWorldMap.Create(Self);
         GMods.SetCurrent('twilight_forest', 'town.ini');
         RefreshMap;
+        Map.GetCurrentMapMobs.Player.Load;
       end;
     Ord('1'):
       begin
+        Map.GetCurrentMapMobs.Player.Save;
         if Assigned(Map) then
           FreeAndNil(Map);
         Map := TWorldMap.Create(Self);
         GMods.SetCurrent('twilight_forest', 'twilight_forest.ini');
         RefreshMap;
+        Map.GetCurrentMapMobs.Player.Load;
       end;
     Ord('2'):
       begin
+        Map.GetCurrentMapMobs.Player.Save;
         if Assigned(Map) then
           FreeAndNil(Map);
         Map := TWorldMap.Create(Self);
         GMods.SetCurrent('twilight_forest', 'dungeon.ini');
         RefreshMap;
+        Map.GetCurrentMapMobs.Player.Load;
       end;
     Ord('L'):
       Map.GetCurrentMapMobs.ChLook;
