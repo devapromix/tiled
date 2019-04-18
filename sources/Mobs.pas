@@ -37,6 +37,7 @@ type
     destructor Destroy; override;
     property Idx: Integer read FIdx write FIdx;
     property IsDefeat: Boolean read FIsDefeat write FIsDefeat;
+    function MaxExp(const Level: Integer): Integer;
     procedure Render(Canvas: TCanvas);
     procedure Defeat;
     procedure FindIdx;
@@ -62,6 +63,7 @@ type
     FLX: Byte;
     FLY: Byte;
     procedure Miss(Atk: TMobInfo);
+    procedure Defeat(DefId: Integer; Def: TMobInfo);
     function Look(DX, DY: Integer): Boolean;
   public
     MobLB: TBitmap;
@@ -80,6 +82,7 @@ type
     function Del(I: Integer): Boolean;
     function IndexOf(const X, Y: Integer): Integer;
     procedure ModLife(const Index, Value: Integer);
+    procedure ModExp(const Index, Value: Integer);
     procedure Move(const AtkId, DX, DY: Integer); overload;
     procedure Move(const DX, DY: Integer); overload;
     procedure Attack(const NX, NY, AtkId, DefId: Integer; Atk, Def: TMobInfo);
@@ -162,7 +165,7 @@ end;
 
 procedure TMobs.Attack(const NX, NY, AtkId, DefId: Integer; Atk, Def: TMobInfo);
 var
-  I, Dam: Integer;
+  Dam: Integer;
 begin
   if (Math.RandomRange(0, Atk.Dexterity + 1) >= Math.RandomRange(0, Def.Dexterity + 1)) then
   begin
@@ -183,20 +186,7 @@ begin
   else
     Miss(Atk);
   if Get(DefId).Life = 0 then
-  begin
-    Log.Add(Format('%s убит', [Def.Name]));
-    Del(DefId);
-    Map.GetCurrentMap.FMap[lrMonsters][NX][NY] := -1;
-    Player.Idx := -1;
-    for I := 0 to Count - 1 do
-      if FForce[I] = '1' then
-      begin
-        Player.Idx := I;
-        Break;
-      end;
-    if Player.Idx = -1 then
-      Player.Defeat;
-  end;
+    Defeat(DefId, Def);
 end;
 
 procedure TMobs.ChLook;
@@ -253,6 +243,29 @@ begin
   FRad := TStringList.Create;
   FAttr := TStringList.Create;
   FReach := TStringList.Create;
+end;
+
+procedure TMobs.Defeat(DefId: Integer; Def: TMobInfo);
+var
+  I, Exp: Integer;
+begin
+  begin
+    Exp := Def.Exp;
+    Log.Add(Format('%s убит', [Def.Name]));
+    Del(DefId);
+    // Map.GetCurrentMap.FMap[lrMonsters][NX][NY] := -1;
+    Player.Idx := -1;
+    for I := 0 to Count - 1 do
+      if FForce[I] = '1' then
+      begin
+        Player.Idx := I;
+        Break;
+      end;
+    if Player.Idx = -1 then
+      Player.Defeat
+    else
+      ModExp(Player.Idx, Exp);
+  end;
 end;
 
 function TMobs.Del(I: Integer): Boolean;
@@ -343,6 +356,22 @@ begin
         end;
       end;
     end;
+end;
+
+procedure TMobs.ModExp(const Index, Value: Integer);
+var
+  Level, Exp, MaxExp: Integer;
+begin
+  Level := FLevel.KeyNames[Index].ToInteger;
+  Exp := FLevel.ValueFromIndex[Index].ToInteger;
+  Exp := Exp + Value;
+  MaxExp := Player.MaxExp(Level);
+  if Exp >= MaxExp then
+  begin
+    Exp := Exp - MaxExp;
+    Level := Level + 1;
+  end;
+  FLevel[Index] := Format(F, [Level, Exp]);
 end;
 
 procedure TMobs.ModLife(const Index, Value: Integer);
@@ -582,7 +611,8 @@ begin
   if Map.GetCurrentMapMobs.Player.IsDefeat then
     Exit;
   M := Map.GetCurrentMapMobs.Get(Idx);
-  S := Format('%s HP: %d/%d Dam:%d-%d', [M.Name, M.Life, M.MaxLife, M.MinDam, M.MaxDam]);
+  S := Format('%s HP: %d/%d Dam: %d-%d P: %d Lev: %d Exp: %d/%d', [M.Name, M.Life, M.MaxLife, M.MinDam, M.MaxDam, M.Protection, M.Level, M.Exp,
+    MaxExp(M.Level)]);
   Canvas.TextOut(0, Map.GetCurrentMap.TileSize * Map.GetCurrentMap.Height, S);
 end;
 
@@ -591,7 +621,7 @@ var
   Path: string;
   SL: TStringList;
   M: TMobInfo;
-  Life, MaxLife: Integer;
+  Level, Exp, MaxLife, MinDam, MaxDam, Str, Dex, Prot: Integer;
 begin
   if IsDefeat then
     Exit;
@@ -601,17 +631,36 @@ begin
   SL := TStringList.Create;
   try
     SL.LoadFromFile(Path, TEncoding.UTF8);
-    Life := StrToInt(SL[0]);
-    MaxLife := StrToInt(SL[1]);
+    Level := StrToInt(SL[0]);
+    Exp := StrToInt(SL[1]);
+    MaxLife := StrToInt(SL[2]);
+    MinDam := StrToInt(SL[3]);
+    MaxDam := StrToInt(SL[4]);
+    Str := StrToInt(SL[5]);
+    Dex := StrToInt(SL[6]);
+    Prot := StrToInt(SL[7]);
     M := Map.GetCurrentMapMobs.Get(Idx);
     Map.GetCurrentMapMobs.Del(Idx);
-    M.Life := Life;
+    M.Level := Level;
+    M.Exp := Exp;
+    M.Life := MaxLife;
     M.MaxLife := MaxLife;
+    M.MinDam := MinDam;
+    M.MaxDam := MaxDam;
+    M.Strength := Str;
+    M.Dexterity := Dex;
+    M.Protection := Prot;
     Map.GetCurrentMapMobs.Add(M);
     Map.GetCurrentMapMobs.Player.FindIdx;
   finally
     FreeAndNil(SL);
   end;
+end;
+
+function TPlayer.MaxExp(const Level: Integer): Integer;
+begin
+  Result := Level * 15;
+  Result := Result + (Result div 5);
 end;
 
 procedure TPlayer.Save;
@@ -626,8 +675,14 @@ begin
   SL := TStringList.Create;
   P := Map.GetCurrentMapMobs.Get(Idx);
   try
-    SL.Append(IntToStr(P.Life));
+    SL.Append(IntToStr(P.Level));
+    SL.Append(IntToStr(P.Exp));
     SL.Append(IntToStr(P.MaxLife));
+    SL.Append(IntToStr(P.MinDam));
+    SL.Append(IntToStr(P.MaxDam));
+    SL.Append(IntToStr(P.Strength));
+    SL.Append(IntToStr(P.Dexterity));
+    SL.Append(IntToStr(P.Protection));
     SL.SaveToFile(Path, TEncoding.UTF8);
   finally
     FreeAndNil(SL);

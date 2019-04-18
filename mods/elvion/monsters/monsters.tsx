@@ -20,6 +20,10 @@
  <tile id="1" type="rat">
   <image width="32" height="32" source="rat.png"/>
   <properties>
+    <property name="strength" type="int" value="5"/>
+    <property name="dexterity" type="int" value="5"/>
+    <property name="protection" type="int" value="0"/>
+    <property name="reach" type="int" value="0"/>
     <property name="min_damage" type="int" value="1"/>
     <property name="max_damage" type="int" value="2"/>
     <property name="exp" type="int" value="3"/>
@@ -32,6 +36,10 @@
  <tile id="2" type="titan">
   <image width="32" height="32" source="titan.png"/>
   <properties>
+    <property name="strength" type="int" value="5"/>
+    <property name="dexterity" type="int" value="5"/>
+    <property name="protection" type="int" value="0"/>
+    <property name="reach" type="int" value="0"/>
     <property name="min_damage" type="int" value="1"/>
     <property name="max_damage" type="int" value="2"/>
     <property name="exp" type="int" value="7"/>
@@ -44,9 +52,13 @@
  <tile id="3" type="raven">
   <image width="32" height="32" source="raven.png"/>
   <properties>
+    <property name="strength" type="int" value="5"/>
+    <property name="dexterity" type="int" value="5"/>
+    <property name="protection" type="int" value="0"/>
+    <property name="reach" type="int" value="0"/>
     <property name="min_damage" type="int" value="1"/>
     <property name="max_damage" type="int" value="2"/>
-    <property name="exp" type="int" value="7"/>
+    <property name="exp" type="int" value="5"/>
     <property name="life" type="int" value="20"/>
     <property name="radius" type="int" value="5"/>
     <property name="level" type="int" value="1"/>
@@ -71,6 +83,10 @@
  <tile id="9" type="darkeye">
   <image width="32" height="32" source="darkeye.png"/>
   <properties>
+    <property name="strength" type="int" value="5"/>
+    <property name="dexterity" type="int" value="5"/>
+    <property name="protection" type="int" value="0"/>
+    <property name="reach" type="int" value="0"/>
     <property name="min_damage" type="int" value="1"/>
     <property name="max_damage" type="int" value="2"/>
     <property name="exp" type="int" value="5"/>
@@ -89,6 +105,10 @@
  <tile id="12" type="witch">
   <image width="32" height="32" source="witch.png"/>
   <properties>
+    <property name="strength" type="int" value="5"/>
+    <property name="dexterity" type="int" value="5"/>
+    <property name="protection" type="int" value="0"/>
+    <property name="reach" type="int" value="0"/>
     <property name="min_damage" type="int" value="1"/>
     <property name="max_damage" type="int" value="2"/>
     <property name="exp" type="int" value="4"/>
@@ -117,6 +137,10 @@
  <tile id="14" type="undead">
   <image width="32" height="32" source="undead.png"/>
   <properties>
+    <property name="strength" type="int" value="5"/>
+    <property name="dexterity" type="int" value="5"/>
+    <property name="protection" type="int" value="0"/>
+    <property name="reach" type="int" value="0"/>
     <property name="min_damage" type="int" value="5"/>
     <property name="max_damage" type="int" value="7"/>
     <property name="exp" type="int" value="4"/>
