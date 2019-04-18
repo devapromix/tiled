@@ -35,9 +35,11 @@ var
 begin
   with Form1 do
   begin
+    Top := 8;
+    Left := 8;
     Caption := Format('%s (%d)', [Map.GetCurrentMap.Name, Map.GetCurrentMap.Level]);
-    W := Map.GetCurrentMap.TileSize * Map.GetCurrentMap.Width;
-    H := Map.GetCurrentMap.TileSize * (Map.GetCurrentMap.Height + 1);
+    W := Map.GetCurrentMap.TileSize * (Map.GetCurrentMap.Width + 16 + 10);
+    H := Map.GetCurrentMap.TileSize * (Map.GetCurrentMap.Height + 1 + 4);
     ClientWidth := Min(W, Screen.Width);
     ClientHeight := Min(H, Screen.Height);
     Surface.Width := ClientWidth;

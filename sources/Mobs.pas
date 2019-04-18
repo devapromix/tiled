@@ -25,6 +25,8 @@ type
     Dexterity: Integer;
     Protection: Integer;
     Reach: Integer;
+    SP: Integer;
+    LP: Integer;
   end;
 
 type
@@ -58,6 +60,7 @@ type
     FRad: TStringList;
     FAttr: TStringList;
     FReach: TStringList;
+    FPoint: TStringList;
     FPlayer: TPlayer;
     FIsLook: Boolean;
     FLX: Byte;
@@ -74,7 +77,7 @@ type
     procedure Clear;
     procedure ChLook;
     procedure LoadFromMap(const N: Integer);
-    procedure Add(const Force, X, Y, Id, Level, Exp: Integer; N: string; L, MaxL, MinD, MaxD, R, Str, Dex, Prot, Reach: Integer); overload;
+    procedure Add(const Force, X, Y, Id, Level, Exp: Integer; N: string; L, MaxL, MinD, MaxD, R, Str, Dex, Prot, Reach, SP, LP: Integer); overload;
     procedure Add(const P: TMobInfo); overload;
     function BarWidth(CX, MX, GS: Integer): Integer;
     function Count: Integer;
@@ -143,7 +146,7 @@ begin
   Result := I;
 end;
 
-procedure TMobs.Add(const Force, X, Y, Id, Level, Exp: Integer; N: string; L, MaxL, MinD, MaxD, R, Str, Dex, Prot, Reach: Integer);
+procedure TMobs.Add(const Force, X, Y, Id, Level, Exp: Integer; N: string; L, MaxL, MinD, MaxD, R, Str, Dex, Prot, Reach, SP, LP: Integer);
 begin
   FForce.Append(Force.ToString);
   FCoord.Append(Format(F, [X, Y]));
@@ -155,12 +158,13 @@ begin
   FRad.Append(R.ToString);
   FAttr.Append(Format(F, [Str, Dex]));
   FReach.Append(Format(F, [Prot, Reach]));
+  FPoint.Append(Format(F, [SP, LP]));
 end;
 
 procedure TMobs.Add(const P: TMobInfo);
 begin
-  Self.Add(P.Force, P.X, P.Y, P.Id, P.Level, P.Exp, P.Name, P.Life, P.MaxLife, P.MinDam, P.MaxDam, P.Radius, P.Strength, P.Dexterity,
-    P.Protection, P.Reach);
+  Self.Add(P.Force, P.X, P.Y, P.Id, P.Level, P.Exp, P.Name, P.Life, P.MaxLife, P.MinDam, P.MaxDam, P.Radius, P.Strength, P.Dexterity, P.Protection,
+    P.Reach, P.SP, P.LP);
 end;
 
 procedure TMobs.Attack(const NX, NY, AtkId, DefId: Integer; Atk, Def: TMobInfo);
@@ -217,6 +221,7 @@ begin
   FRad.Clear;
   FAttr.Clear;
   FReach.Clear;
+  FPoint.Clear;
 end;
 
 function TMobs.Count: Integer;
@@ -243,6 +248,7 @@ begin
   FRad := TStringList.Create;
   FAttr := TStringList.Create;
   FReach := TStringList.Create;
+  FPoint := TStringList.Create;
 end;
 
 procedure TMobs.Defeat(DefId: Integer; Def: TMobInfo);
@@ -280,6 +286,7 @@ begin
   FRad.Delete(I);
   FAttr.Delete(I);
   FReach.Delete(I);
+  FPoint.Delete(I);
   Result := True;
 end;
 
@@ -299,6 +306,7 @@ begin
   FreeAndNil(FRad);
   FreeAndNil(FAttr);
   FreeAndNil(FReach);
+  FreeAndNil(FPoint);
   inherited;
 end;
 
@@ -320,6 +328,8 @@ begin
   Result.Dexterity := FAttr.ValueFromIndex[I].ToInteger;
   Result.Protection := FReach.KeyNames[I].ToInteger;
   Result.Reach := FReach.ValueFromIndex[I].ToInteger;
+  Result.SP := FPoint.KeyNames[I].ToInteger;
+  Result.LP := FPoint.ValueFromIndex[I].ToInteger;
 end;
 
 function TMobs.GetDist(FromX, FromY, ToX, ToY: Single): Word;
@@ -351,7 +361,7 @@ begin
             Player.Idx := J;
             F := 1;
           end;
-          Add(F, X, Y, I, Level, Exp, Name, Life, Life, MinDam, MaxDam, Radius, Strength, Dexterity, Protection, Reach);
+          Add(F, X, Y, I, Level, Exp, Name, Life, Life, MinDam, MaxDam, Radius, Strength, Dexterity, Protection, Reach, 0, 0);
           Inc(J);
         end;
       end;
@@ -360,18 +370,24 @@ end;
 
 procedure TMobs.ModExp(const Index, Value: Integer);
 var
-  Level, Exp, MaxExp: Integer;
+  SP, LP, Level, Exp, MaxExp: Integer;
 begin
   Level := FLevel.KeyNames[Index].ToInteger;
   Exp := FLevel.ValueFromIndex[Index].ToInteger;
+  SP := FPoint.KeyNames[Index].ToInteger;
+  LP := FPoint.ValueFromIndex[Index].ToInteger;
   Exp := Exp + Value;
+  Log.Add(Format('Опыт: +%d.', [Value]));
   MaxExp := Player.MaxExp(Level);
-  if Exp >= MaxExp then
+  if Exp > MaxExp then
   begin
-    Exp := Exp - MaxExp;
+    Log.Add('Новый уровень!');
     Level := Level + 1;
+    SP := SP + 3;
+    LP := LP + 1;
   end;
   FLevel[Index] := Format(F, [Level, Exp]);
+  FPoint[Index] := Format(F, [SP, LP]);
 end;
 
 procedure TMobs.ModLife(const Index, Value: Integer);
@@ -611,9 +627,9 @@ begin
   if Map.GetCurrentMapMobs.Player.IsDefeat then
     Exit;
   M := Map.GetCurrentMapMobs.Get(Idx);
-  S := Format('%s HP: %d/%d Dam: %d-%d P: %d Lev: %d Exp: %d/%d', [M.Name, M.Life, M.MaxLife, M.MinDam, M.MaxDam, M.Protection, M.Level, M.Exp,
-    MaxExp(M.Level)]);
-  Canvas.TextOut(0, Map.GetCurrentMap.TileSize * Map.GetCurrentMap.Height, S);
+  S := Format('%s HP: %d/%d Dam: %d-%d P: %d Lev: %d Exp: %d/%d SP/LP: %d/%d ST/DX: %d/%d', [M.Name, M.Life, M.MaxLife, M.MinDam, M.MaxDam,
+    M.Protection, M.Level, M.Exp, MaxExp(M.Level), M.SP, M.LP, M.Strength, M.Dexterity]);
+  Canvas.TextOut(0, Map.GetCurrentMap.TileSize * (Map.GetCurrentMap.Height + 4), S);
 end;
 
 procedure TPlayer.Load;
@@ -621,7 +637,7 @@ var
   Path: string;
   SL: TStringList;
   M: TMobInfo;
-  Level, Exp, MaxLife, MinDam, MaxDam, Str, Dex, Prot: Integer;
+  Level, Exp, MaxLife, MinDam, MaxDam, Str, Dex, Prot, SP, LP: Integer;
 begin
   if IsDefeat then
     Exit;
@@ -639,6 +655,8 @@ begin
     Str := StrToInt(SL[5]);
     Dex := StrToInt(SL[6]);
     Prot := StrToInt(SL[7]);
+    SP := StrToInt(SL[8]);
+    LP := StrToInt(SL[9]);
     M := Map.GetCurrentMapMobs.Get(Idx);
     Map.GetCurrentMapMobs.Del(Idx);
     M.Level := Level;
@@ -650,6 +668,8 @@ begin
     M.Strength := Str;
     M.Dexterity := Dex;
     M.Protection := Prot;
+    M.SP := SP;
+    M.LP := LP;
     Map.GetCurrentMapMobs.Add(M);
     Map.GetCurrentMapMobs.Player.FindIdx;
   finally
@@ -658,9 +678,12 @@ begin
 end;
 
 function TPlayer.MaxExp(const Level: Integer): Integer;
+var
+  I: Integer;
 begin
-  Result := Level * 15;
-  Result := Result + (Result div 5);
+  Result := 10;
+  for I := 1 to Level do
+    Result := Result + ((Level * 10) + Round(Result * 0.33));
 end;
 
 procedure TPlayer.Save;
@@ -683,6 +706,8 @@ begin
     SL.Append(IntToStr(P.Strength));
     SL.Append(IntToStr(P.Dexterity));
     SL.Append(IntToStr(P.Protection));
+    SL.Append(IntToStr(P.SP));
+    SL.Append(IntToStr(P.LP));
     SL.SaveToFile(Path, TEncoding.UTF8);
   finally
     FreeAndNil(SL);
