@@ -116,7 +116,6 @@
         </DCCReference>
         <DCCReference Include="TiledMap.pas"/>
         <DCCReference Include="WorldMap.pas"/>
-        <DCCReference Include="Creature.pas"/>
         <DCCReference Include="Utils.pas"/>
         <DCCReference Include="Mods.pas"/>
         <DCCReference Include="Mobs.pas"/>

@@ -25,7 +25,7 @@ var
 
 implementation
 
-uses Math, WorldMap, Utils, Mods, Mobs, MsgLog, Creature;
+uses Math, WorldMap, Utils, Mods, Mobs, MsgLog;
 
 {$R *.dfm}
 

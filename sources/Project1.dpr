@@ -5,7 +5,6 @@ uses
   Unit1 in 'Unit1.pas' {Form1},
   TiledMap in 'TiledMap.pas',
   WorldMap in 'WorldMap.pas',
-  Creature in 'Creature.pas',
   Utils in 'Utils.pas',
   Mods in 'Mods.pas',
   Mobs in 'Mobs.pas',
