@@ -23,6 +23,8 @@ type
     Radius: Integer;
     Strength: Integer;
     Dexterity: Integer;
+    Intellect: Integer;
+    Perception: Integer;
     Protection: Integer;
     Reach: Integer;
     SP: Integer;
@@ -58,7 +60,8 @@ type
     FLife: TStringList;
     FDam: TStringList;
     FRad: TStringList;
-    FAttr: TStringList;
+    FAt1: TStringList;
+    FAt2: TStringList;
     FReach: TStringList;
     FPoint: TStringList;
     FPlayer: TPlayer;
@@ -77,7 +80,8 @@ type
     procedure Clear;
     procedure ChLook;
     procedure LoadFromMap(const N: Integer);
-    procedure Add(const Force, X, Y, Id, Level, Exp: Integer; N: string; L, MaxL, MinD, MaxD, R, Str, Dex, Prot, Reach, SP, LP: Integer); overload;
+    procedure Add(const Force, X, Y, Id, Level, Exp: Integer; N: string; L, MaxL, MinD, MaxD, R, Str, Dex, Int, Per, Prot, Reach, SP,
+      LP: Integer); overload;
     procedure Add(const P: TMobInfo); overload;
     function BarWidth(CX, MX, GS: Integer): Integer;
     function Count: Integer;
@@ -146,7 +150,7 @@ begin
   Result := I;
 end;
 
-procedure TMobs.Add(const Force, X, Y, Id, Level, Exp: Integer; N: string; L, MaxL, MinD, MaxD, R, Str, Dex, Prot, Reach, SP, LP: Integer);
+procedure TMobs.Add(const Force, X, Y, Id, Level, Exp: Integer; N: string; L, MaxL, MinD, MaxD, R, Str, Dex, Int, Per, Prot, Reach, SP, LP: Integer);
 begin
   FForce.Append(Force.ToString);
   FCoord.Append(Format(F, [X, Y]));
@@ -156,15 +160,16 @@ begin
   FLife.Append(Format(F, [L, MaxL]));
   FDam.Append(Format(F, [MinD, MaxD]));
   FRad.Append(R.ToString);
-  FAttr.Append(Format(F, [Str, Dex]));
+  FAt1.Append(Format(F, [Str, Dex]));
+  FAt2.Append(Format(F, [Int, Per]));
   FReach.Append(Format(F, [Prot, Reach]));
   FPoint.Append(Format(F, [SP, LP]));
 end;
 
 procedure TMobs.Add(const P: TMobInfo);
 begin
-  Self.Add(P.Force, P.X, P.Y, P.Id, P.Level, P.Exp, P.Name, P.Life, P.MaxLife, P.MinDam, P.MaxDam, P.Radius, P.Strength, P.Dexterity, P.Protection,
-    P.Reach, P.SP, P.LP);
+  Self.Add(P.Force, P.X, P.Y, P.Id, P.Level, P.Exp, P.Name, P.Life, P.MaxLife, P.MinDam, P.MaxDam, P.Radius, P.Strength, P.Dexterity, P.Intellect,
+    P.Perception, P.Protection, P.Reach, P.SP, P.LP);
 end;
 
 procedure TMobs.Attack(const NX, NY, AtkId, DefId: Integer; Atk, Def: TMobInfo);
@@ -219,7 +224,8 @@ begin
   FLife.Clear;
   FDam.Clear;
   FRad.Clear;
-  FAttr.Clear;
+  FAt1.Clear;
+  FAt2.Clear;
   FReach.Clear;
   FPoint.Clear;
 end;
@@ -246,7 +252,8 @@ begin
   FLife := TStringList.Create;
   FDam := TStringList.Create;
   FRad := TStringList.Create;
-  FAttr := TStringList.Create;
+  FAt1 := TStringList.Create;
+  FAt2 := TStringList.Create;
   FReach := TStringList.Create;
   FPoint := TStringList.Create;
 end;
@@ -284,7 +291,8 @@ begin
   FLife.Delete(I);
   FDam.Delete(I);
   FRad.Delete(I);
-  FAttr.Delete(I);
+  FAt1.Delete(I);
+  FAt2.Delete(I);
   FReach.Delete(I);
   FPoint.Delete(I);
   Result := True;
@@ -304,7 +312,8 @@ begin
   FreeAndNil(FLife);
   FreeAndNil(FDam);
   FreeAndNil(FRad);
-  FreeAndNil(FAttr);
+  FreeAndNil(FAt1);
+  FreeAndNil(FAt2);
   FreeAndNil(FReach);
   FreeAndNil(FPoint);
   inherited;
@@ -324,8 +333,10 @@ begin
   Result.MinDam := FDam.KeyNames[I].ToInteger;
   Result.MaxDam := FDam.ValueFromIndex[I].ToInteger;
   Result.Radius := FRad[I].ToInteger;
-  Result.Strength := FAttr.KeyNames[I].ToInteger;
-  Result.Dexterity := FAttr.ValueFromIndex[I].ToInteger;
+  Result.Strength := FAt1.KeyNames[I].ToInteger;
+  Result.Dexterity := FAt1.ValueFromIndex[I].ToInteger;
+  Result.Intellect := FAt2.KeyNames[I].ToInteger;
+  Result.Perception := FAt2.ValueFromIndex[I].ToInteger;
   Result.Protection := FReach.KeyNames[I].ToInteger;
   Result.Reach := FReach.ValueFromIndex[I].ToInteger;
   Result.SP := FPoint.KeyNames[I].ToInteger;
@@ -361,7 +372,7 @@ begin
             Player.Idx := J;
             F := 1;
           end;
-          Add(F, X, Y, I, Level, Exp, Name, Life, Life, MinDam, MaxDam, Radius, Strength, Dexterity, Protection, Reach, 0, 0);
+          Add(F, X, Y, I, Level, Exp, Name, Life, Life, MinDam, MaxDam, Radius, Strength, Dexterity, Intellect, Perception, Protection, Reach, 0, 0);
           Inc(J);
         end;
       end;
@@ -627,8 +638,9 @@ begin
   if Map.GetCurrentMapMobs.Player.IsDefeat then
     Exit;
   M := Map.GetCurrentMapMobs.Get(Idx);
-  S := Format('%s HP: %d/%d Dam: %d-%d P: %d Lev: %d Exp: %d/%d SP/LP: %d/%d ST/DX: %d/%d', [M.Name, M.Life, M.MaxLife, M.MinDam, M.MaxDam,
-    M.Protection, M.Level, M.Exp, MaxExp(M.Level), M.SP, M.LP, M.Strength, M.Dexterity]);
+  S := Format('%s HP:%d/%d Dam:%d-%d P:%d Lev:%d Exp:%d/%d SP/LP:%d/%d STR/DEX/INT/PER: %d/%d/%d/%d',
+    [M.Name, M.Life, M.MaxLife, M.MinDam, M.MaxDam, M.Protection, M.Level, M.Exp, MaxExp(M.Level), M.SP, M.LP, M.Strength, M.Dexterity, M.Intellect,
+    M.Perception]);
   Canvas.TextOut(0, Map.GetCurrentMap.TileSize * (Map.GetCurrentMap.Height + 4), S);
 end;
 
@@ -637,7 +649,7 @@ var
   Path: string;
   SL: TStringList;
   M: TMobInfo;
-  Level, Exp, MaxLife, MinDam, MaxDam, Str, Dex, Prot, SP, LP: Integer;
+  Level, Exp, MaxLife, MinDam, MaxDam, Str, Dex, Int, Per, Prot, SP, LP: Integer;
 begin
   if IsDefeat then
     Exit;
@@ -654,9 +666,11 @@ begin
     MaxDam := StrToInt(SL[4]);
     Str := StrToInt(SL[5]);
     Dex := StrToInt(SL[6]);
-    Prot := StrToInt(SL[7]);
-    SP := StrToInt(SL[8]);
-    LP := StrToInt(SL[9]);
+    Int := StrToInt(SL[7]);
+    Per := StrToInt(SL[8]);
+    Prot := StrToInt(SL[9]);
+    SP := StrToInt(SL[10]);
+    LP := StrToInt(SL[11]);
     M := Map.GetCurrentMapMobs.Get(Idx);
     Map.GetCurrentMapMobs.Del(Idx);
     M.Level := Level;
@@ -667,6 +681,8 @@ begin
     M.MaxDam := MaxDam;
     M.Strength := Str;
     M.Dexterity := Dex;
+    M.Intellect := Int;
+    M.Perception := Per;
     M.Protection := Prot;
     M.SP := SP;
     M.LP := LP;
@@ -705,6 +721,8 @@ begin
     SL.Append(IntToStr(P.MaxDam));
     SL.Append(IntToStr(P.Strength));
     SL.Append(IntToStr(P.Dexterity));
+    SL.Append(IntToStr(P.Intellect));
+    SL.Append(IntToStr(P.Perception));
     SL.Append(IntToStr(P.Protection));
     SL.Append(IntToStr(P.SP));
     SL.Append(IntToStr(P.LP));

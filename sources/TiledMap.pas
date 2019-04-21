@@ -28,6 +28,8 @@ type
       TileType: string;
       Strength: Integer;
       Dexterity: Integer;
+      Intellect: Integer;
+      Perception: Integer;
       Protection: Integer;
       Reach: Integer;
       Level: Integer;
@@ -175,6 +177,10 @@ var
                 TiledObject[ID].Strength := StrToIntDef(Value, 1);
               if (Name = 'dexterity') then
                 TiledObject[ID].Dexterity := StrToIntDef(Value, 1);
+              if (Name = 'intellect') then
+                TiledObject[ID].Intellect := StrToIntDef(Value, 1);
+              if (Name = 'perception') then
+                TiledObject[ID].Perception := StrToIntDef(Value, 1);
               if (Name = 'protection') then
                 TiledObject[ID].Protection := StrToIntDef(Value, 0);
               if (Name = 'reach') then

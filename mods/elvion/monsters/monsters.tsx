@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="UTF-8"?>
+<?xml version="1.0" encoding="UTF-8"?>
 <tileset name="monsters" tilewidth="32" tileheight="32" tilecount="15" columns="0">
  <grid orientation="orthogonal" width="1" height="1"/>
  <tile id="0" type="player">
@@ -6,7 +6,9 @@
   <properties>
     <property name="strength" type="int" value="5"/>
     <property name="dexterity" type="int" value="5"/>
-    <property name="protection" type="int" value="5"/>
+    <property name="intellect" type="int" value="5"/>
+    <property name="perception" type="int" value="5"/>
+    <property name="protection" type="int" value="0"/>
     <property name="reach" type="int" value="0"/>
     <property name="min_damage" type="int" value="1"/>
     <property name="max_damage" type="int" value="2"/>
@@ -22,6 +24,8 @@
   <properties>
     <property name="strength" type="int" value="5"/>
     <property name="dexterity" type="int" value="5"/>
+    <property name="intellect" type="int" value="5"/>
+    <property name="perception" type="int" value="5"/>
     <property name="protection" type="int" value="0"/>
     <property name="reach" type="int" value="0"/>
     <property name="min_damage" type="int" value="1"/>
@@ -38,6 +42,8 @@
   <properties>
     <property name="strength" type="int" value="5"/>
     <property name="dexterity" type="int" value="5"/>
+    <property name="intellect" type="int" value="5"/>
+    <property name="perception" type="int" value="5"/>
     <property name="protection" type="int" value="0"/>
     <property name="reach" type="int" value="0"/>
     <property name="min_damage" type="int" value="1"/>
@@ -54,6 +60,8 @@
   <properties>
     <property name="strength" type="int" value="5"/>
     <property name="dexterity" type="int" value="5"/>
+    <property name="intellect" type="int" value="5"/>
+    <property name="perception" type="int" value="5"/>
     <property name="protection" type="int" value="0"/>
     <property name="reach" type="int" value="0"/>
     <property name="min_damage" type="int" value="1"/>
@@ -67,24 +75,101 @@
  </tile>
  <tile id="4" type="spider">
   <image width="32" height="32" source="orb_spider.png"/>
+  <properties>
+    <property name="strength" type="int" value="5"/>
+    <property name="dexterity" type="int" value="5"/>
+    <property name="intellect" type="int" value="5"/>
+    <property name="perception" type="int" value="5"/>
+    <property name="protection" type="int" value="0"/>
+    <property name="reach" type="int" value="0"/>
+    <property name="min_damage" type="int" value="1"/>
+    <property name="max_damage" type="int" value="2"/>
+    <property name="exp" type="int" value="5"/>
+    <property name="life" type="int" value="20"/>
+    <property name="radius" type="int" value="5"/>
+    <property name="level" type="int" value="1"/>
+    <property name="name" value="Паук"/>
+ </properties>
  </tile>
  <tile id="5" type="scorpion">
   <image width="32" height="32" source="scorpion.png"/>
+  <properties>
+    <property name="strength" type="int" value="5"/>
+    <property name="dexterity" type="int" value="5"/>
+    <property name="intellect" type="int" value="5"/>
+    <property name="perception" type="int" value="5"/>
+    <property name="protection" type="int" value="0"/>
+    <property name="reach" type="int" value="0"/>
+    <property name="min_damage" type="int" value="1"/>
+    <property name="max_damage" type="int" value="2"/>
+    <property name="exp" type="int" value="5"/>
+    <property name="life" type="int" value="20"/>
+    <property name="radius" type="int" value="5"/>
+    <property name="level" type="int" value="1"/>
+    <property name="name" value="Скорпион"/>
+ </properties>
  </tile>
  <tile id="6" type="stone_golem">
   <image width="32" height="32" source="stonegolem.png"/>
+  <properties>
+    <property name="strength" type="int" value="5"/>
+    <property name="dexterity" type="int" value="5"/>
+    <property name="intellect" type="int" value="5"/>
+    <property name="perception" type="int" value="5"/>
+    <property name="protection" type="int" value="0"/>
+    <property name="reach" type="int" value="0"/>
+    <property name="min_damage" type="int" value="1"/>
+    <property name="max_damage" type="int" value="2"/>
+    <property name="exp" type="int" value="5"/>
+    <property name="life" type="int" value="20"/>
+    <property name="radius" type="int" value="5"/>
+    <property name="level" type="int" value="1"/>
+    <property name="name" value="Каменный Голем"/>
+ </properties>
  </tile>
  <tile id="7" type="s_archer">
   <image width="32" height="32" source="sarcher.png"/>
+  <properties>
+    <property name="strength" type="int" value="5"/>
+    <property name="dexterity" type="int" value="5"/>
+    <property name="intellect" type="int" value="5"/>
+    <property name="perception" type="int" value="5"/>
+    <property name="protection" type="int" value="0"/>
+    <property name="reach" type="int" value="0"/>
+    <property name="min_damage" type="int" value="1"/>
+    <property name="max_damage" type="int" value="2"/>
+    <property name="exp" type="int" value="5"/>
+    <property name="life" type="int" value="20"/>
+    <property name="radius" type="int" value="5"/>
+    <property name="level" type="int" value="1"/>
+    <property name="name" value="Скелет"/>
+ </properties>
  </tile>
  <tile id="8" type="bear">
   <image width="32" height="32" source="bear.png"/>
+  <properties>
+    <property name="strength" type="int" value="5"/>
+    <property name="dexterity" type="int" value="5"/>
+    <property name="intellect" type="int" value="5"/>
+    <property name="perception" type="int" value="5"/>
+    <property name="protection" type="int" value="0"/>
+    <property name="reach" type="int" value="0"/>
+    <property name="min_damage" type="int" value="1"/>
+    <property name="max_damage" type="int" value="2"/>
+    <property name="exp" type="int" value="5"/>
+    <property name="life" type="int" value="20"/>
+    <property name="radius" type="int" value="5"/>
+    <property name="level" type="int" value="1"/>
+    <property name="name" value="Бурый Медведь"/>
+ </properties>
  </tile>
  <tile id="9" type="darkeye">
   <image width="32" height="32" source="darkeye.png"/>
   <properties>
     <property name="strength" type="int" value="5"/>
     <property name="dexterity" type="int" value="5"/>
+    <property name="intellect" type="int" value="5"/>
+    <property name="perception" type="int" value="5"/>
     <property name="protection" type="int" value="0"/>
     <property name="reach" type="int" value="0"/>
     <property name="min_damage" type="int" value="1"/>
@@ -98,15 +183,47 @@
  </tile>
  <tile id="10" type="goblin">
   <image width="32" height="32" source="goblin.png"/>
+  <properties>
+    <property name="strength" type="int" value="5"/>
+    <property name="dexterity" type="int" value="5"/>
+    <property name="intellect" type="int" value="5"/>
+    <property name="perception" type="int" value="5"/>
+    <property name="protection" type="int" value="0"/>
+    <property name="reach" type="int" value="0"/>
+    <property name="min_damage" type="int" value="1"/>
+    <property name="max_damage" type="int" value="2"/>
+    <property name="exp" type="int" value="4"/>
+    <property name="life" type="int" value="8"/>
+    <property name="radius" type="int" value="7"/>
+    <property name="level" type="int" value="1"/>
+    <property name="name" value="Гоблин"/>
+ </properties>
  </tile>
  <tile id="11" type="murlok">
   <image width="32" height="32" source="murlok.png"/>
+  <properties>
+    <property name="strength" type="int" value="5"/>
+    <property name="dexterity" type="int" value="5"/>
+    <property name="intellect" type="int" value="5"/>
+    <property name="perception" type="int" value="5"/>
+    <property name="protection" type="int" value="0"/>
+    <property name="reach" type="int" value="0"/>
+    <property name="min_damage" type="int" value="1"/>
+    <property name="max_damage" type="int" value="2"/>
+    <property name="exp" type="int" value="4"/>
+    <property name="life" type="int" value="8"/>
+    <property name="radius" type="int" value="7"/>
+    <property name="level" type="int" value="1"/>
+    <property name="name" value="Мурлок"/>
+ </properties>
  </tile>
  <tile id="12" type="witch">
   <image width="32" height="32" source="witch.png"/>
   <properties>
     <property name="strength" type="int" value="5"/>
     <property name="dexterity" type="int" value="5"/>
+    <property name="intellect" type="int" value="5"/>
+    <property name="perception" type="int" value="5"/>
     <property name="protection" type="int" value="0"/>
     <property name="reach" type="int" value="0"/>
     <property name="min_damage" type="int" value="1"/>
@@ -123,6 +240,8 @@
   <properties>
     <property name="strength" type="int" value="5"/>
     <property name="dexterity" type="int" value="5"/>
+    <property name="intellect" type="int" value="5"/>
+    <property name="perception" type="int" value="5"/>
     <property name="protection" type="int" value="0"/>
     <property name="reach" type="int" value="0"/>
     <property name="min_damage" type="int" value="1"/>
@@ -139,6 +258,8 @@
   <properties>
     <property name="strength" type="int" value="5"/>
     <property name="dexterity" type="int" value="5"/>
+    <property name="intellect" type="int" value="5"/>
+    <property name="perception" type="int" value="5"/>
     <property name="protection" type="int" value="0"/>
     <property name="reach" type="int" value="0"/>
     <property name="min_damage" type="int" value="5"/>
